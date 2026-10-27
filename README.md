@@ -37,7 +37,7 @@ Parameters:
 | `ExternalId` | ExternalId of the Neuralsec connection |
 | `NeuralsecBrokerArn` | ARN of the Neuralsec broker role |
 | `TargetOrganizationalUnitIds` | comma-separated organizational unit ids that receive the role, for example `ou-abcd-11111111` |
-| `TemplateURL` | required, S3 HTTPS URL of `cloud-scanner-role.yaml` for the release you install, in a bucket the deploying account can read |
+| `TemplateURL` | required, S3 HTTPS URL of `cloud-scanner-role.yaml` for the release you install, for example `https://neuralsec-release-cloudformation-templates.s3.eu-west-1.amazonaws.com/v0.2.0/cloud-scanner-role.yaml` |
 
 It creates the StackSet `neuralsec-cloud-scanner-role` (service-managed, `CAPABILITY_NAMED_IAM`, deployed to the region of the stack). Accounts added to the target OUs later receive the role automatically; stacks are removed when an account leaves the OUs (`RetainStacksOnAccountRemoval: false`). It has no outputs.
 
@@ -58,11 +58,11 @@ Output: `RoleArn`. The inline policy `neuralsec-codeartifact-read` grants `codea
 
 ## Deploying
 
-Neuralsec shows the ExternalId and the broker ARN when you create the connection. Take the templates from a tagged release of this repository (each release carries every template), and pin that tag for production installs.
+Neuralsec shows the ExternalId and the broker ARN when you create the connection. Every release is also published, read-only and over HTTPS only, at `https://neuralsec-release-cloudformation-templates.s3.eu-west-1.amazonaws.com/<tag>/<template>` (for example `https://neuralsec-release-cloudformation-templates.s3.eu-west-1.amazonaws.com/v0.2.0/cloud-scanner-role.yaml`), and the rolling `latest/` prefix holds the newest release. Pin a tag for production installs.
 
 ### Console quick-create
 
-Open the CloudFormation console, choose Create stack with new resources, upload the template file, fill in `ExternalId` and `NeuralsecBrokerArn`, tick the acknowledgement that the stack creates named IAM resources, and create the stack.
+Use the Quick-create link Neuralsec shows for your connection: it opens the CloudFormation console with the published template URL and both parameters filled in. To do it by hand, choose Create stack with new resources, give the published template URL (or upload the template file), fill in `ExternalId` and `NeuralsecBrokerArn`, tick the acknowledgement that the stack creates named IAM resources, and create the stack.
 
 ### AWS CLI
 
@@ -82,8 +82,7 @@ The values above are placeholders. Use the ones Neuralsec shows for your connect
 
 1. In the management account (or a delegated administrator), enable trusted access for CloudFormation StackSets in AWS Organizations.
 2. Deploy `cloud-scanner-org-reader.yaml` as a normal stack in the management or delegated administrator account.
-3. Upload `cloud-scanner-role.yaml` from the release to an S3 bucket in that account (StackSets read their template from S3), for example `aws s3 cp templates/cloud-scanner-role.yaml s3://<your-bucket>/neuralsec/v0.1.0/cloud-scanner-role.yaml`.
-4. Deploy `cloud-scanner-stackset.yaml` as a normal stack in the same account, with `TemplateURL` set to the S3 HTTPS URL of that object and `TargetOrganizationalUnitIds` set to the OUs to scan:
+3. Deploy `cloud-scanner-stackset.yaml` as a normal stack in the same account, with `TemplateURL` set to the published `cloud-scanner-role.yaml` of the same release (or to your own copy in S3) and `TargetOrganizationalUnitIds` set to the OUs to scan:
 
 ```
 aws cloudformation deploy \
@@ -94,7 +93,7 @@ aws cloudformation deploy \
     ExternalId=neuralsec-0123456789abcdef0123456789abcdef \
     NeuralsecBrokerArn=arn:aws:iam::111111111111:role/neuralsec-broker \
     TargetOrganizationalUnitIds=ou-abcd-11111111 \
-    TemplateURL=https://<your-bucket>.s3.<region>.amazonaws.com/neuralsec/v0.1.0/cloud-scanner-role.yaml
+    TemplateURL=https://neuralsec-release-cloudformation-templates.s3.eu-west-1.amazonaws.com/v0.2.0/cloud-scanner-role.yaml
 ```
 
 Service-managed StackSets do not deploy to the management account itself. Deploy `cloud-scanner-role.yaml` there as a normal stack if you want it scanned.
