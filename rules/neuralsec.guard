@@ -1,0 +1,45 @@
+# cfn-guard rules for the Neuralsec CloudFormation templates.
+#
+# No IAM policy may use an action wildcard: the scanner holds named read
+# actions only, so a "*" hides a permission the reviewer cannot see. Every role
+# trust policy names the Neuralsec broker and requires the connection
+# ExternalId, with no condition-free fallback.
+
+rule no_wildcard_actions {
+  Resources.*[ Type == 'AWS::IAM::ManagedPolicy' ] {
+    Properties.PolicyDocument.Statement[*].Action[*] != /.*[*].*/
+  }
+}
+
+# Every action of a managed policy is a read action plus the two named
+# exceptions, exactly as in the Terraform chunker and scripts/check-actions.sh:
+# iam:GenerateCredentialReport starts the credential report and apigateway:GET
+# is API Gateway's read action (its IAM actions are HTTP verbs).
+rule only_named_read_actions {
+  Resources.*[ Type == 'AWS::IAM::ManagedPolicy' ] {
+    Properties.PolicyDocument.Statement[*].Action[*] == /^([a-z0-9-]+:(List|Describe|Get|BatchGet|Search|Select|Lookup)[A-Za-z0-9]*|iam:GenerateCredentialReport|apigateway:GET)$/
+  }
+}
+
+# Read verbs that return customer content instead of metadata (object bodies,
+# secret values, parameters, logs, items, messages, image layers) are never
+# allowed, in any letter case.
+rule no_content_read_actions {
+  Resources.*[ Type == 'AWS::IAM::ManagedPolicy' ] {
+    Properties.PolicyDocument.Statement[*].Action[*] != /^(?i)(s3:(getobject|getobjectversion|selectobjectcontent)|secretsmanager:(getsecretvalue|batchgetsecretvalue)|ssm:(getparameter|getparameters|getparametersbypath)|kms:decrypt|logs:(getlogevents|filterlogevents)|dynamodb:(getitem|scan|query)|sqs:receivemessage|ecr:(batchgetimage|getdownloadurlforlayer))$/
+  }
+}
+
+rule no_wildcard_role_trust_actions {
+  Resources.*[ Type == 'AWS::IAM::Role' ] {
+    Properties.AssumeRolePolicyDocument.Statement[*].Action[*] != /.*[*].*/
+  }
+}
+
+rule role_trust_requires_external_id {
+  Resources.*[ Type == 'AWS::IAM::Role' ] {
+    Properties.AssumeRolePolicyDocument.Statement[*] {
+      Condition.StringEquals.'sts:ExternalId' exists
+    }
+  }
+}
