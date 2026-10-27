@@ -6,7 +6,8 @@ Description: >-
   ExternalId of the connection. EKS access entries are not created by this
   template: CloudFormation cannot expand a cluster name list into one
   AWS::EKS::AccessEntry per cluster, so EKS clusters use the Terraform module
-  modules/cloud-scanner-role instead.
+  modules/cloud-scanner-role instead (it also ships the read-only RBAC
+  ClusterRole manifest the scanner needs inside each cluster).
 
 Parameters:
   ExternalId:

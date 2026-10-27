@@ -43,3 +43,16 @@ rule role_trust_requires_external_id {
     }
   }
 }
+
+# The only principal a role trust policy may allow is the NeuralsecBrokerArn
+# parameter, and the only action is sts:AssumeRole. A literal ARN, "*" or any
+# other principal fails.
+rule role_trust_only_neuralsec_broker {
+  Resources.*[ Type == 'AWS::IAM::Role' ] {
+    Properties.AssumeRolePolicyDocument.Statement[*] {
+      Effect == 'Allow'
+      Action[*] == 'sts:AssumeRole'
+      Principal.AWS.Ref == 'NeuralsecBrokerArn'
+    }
+  }
+}
