@@ -1,0 +1,53 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: >-
+  Service-managed CloudFormation StackSet that deploys the Neuralsec read-only
+  cloud inventory role to every account in the target organizational units.
+  Auto-deployment is on, so accounts added to those OUs receive the role too.
+
+Parameters:
+  ExternalId:
+    Type: String
+    AllowedPattern: ^neuralsec-[0-9a-f]{32}$
+    ConstraintDescription: neuralsec- followed by 32 lowercase hex characters.
+    Description: ExternalId of the Neuralsec connection, generated once per connection.
+  NeuralsecBrokerArn:
+    Type: String
+    AllowedPattern: ^arn:aws[a-z-]*:iam::[0-9]{12}:role/.+$
+    ConstraintDescription: An IAM role ARN.
+    Description: ARN of the Neuralsec broker role, the only principal allowed to assume the deployed role.
+  TargetOrganizationalUnitIds:
+    Type: CommaDelimitedList
+    AllowedPattern: ^ou-[0-9a-z]{4,32}-[a-z0-9]{8,32}$
+    ConstraintDescription: One or more organizational unit ids.
+    Description: Organizational unit ids that receive the role, for example ou-abcd-11111111.
+  TemplateURL:
+    Type: String
+    AllowedPattern: ^https://.+$
+    ConstraintDescription: An HTTPS URL.
+    Description: Required. HTTPS URL of cloud-scanner-role.yaml for this release, from the Neuralsec template bucket.
+
+Resources:
+  ScannerRoleStackSet:
+    Type: AWS::CloudFormation::StackSet
+    Properties:
+      StackSetName: neuralsec-cloud-scanner-role
+      Description: Neuralsec read-only cloud inventory role in every account of the target organizational units.
+      PermissionModel: SERVICE_MANAGED
+      CallAs: SELF
+      AutoDeployment:
+        Enabled: true
+        RetainStacksOnAccountRemoval: false
+      Capabilities:
+        - CAPABILITY_NAMED_IAM
+      TemplateURL: !Ref TemplateURL
+      Parameters:
+        - ParameterKey: ExternalId
+          ParameterValue: !Ref ExternalId
+        - ParameterKey: NeuralsecBrokerArn
+          ParameterValue: !Ref NeuralsecBrokerArn
+      StackInstancesGroup:
+        - DeploymentTargets:
+            OrganizationalUnitIds: !Ref TargetOrganizationalUnitIds
+          Regions:
+            - !Ref AWS::Region

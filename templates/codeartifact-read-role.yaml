@@ -1,0 +1,89 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: >-
+  Neuralsec read-only AWS CodeArtifact access role. Creates the role the
+  Neuralsec broker assumes to read the CodeArtifact domains of every Neuralsec
+  aws_codeartifact registry that shares it: the trust policy requires the
+  ExternalId of every such registry, and the inline policy
+  neuralsec-codeartifact-read grants only the CodeArtifact read actions, scoped
+  to the given domains and their repositories. When another registry starts
+  using the same role, update this stack with its new template instead of
+  creating a second one.
+
+Parameters:
+  ExternalIds:
+    Type: CommaDelimitedList
+    AllowedPattern: ^neuralsec-[0-9a-f]{32}$
+    ConstraintDescription: One or more neuralsec- followed by 32 lowercase hex characters.
+    Description: ExternalId of every Neuralsec CodeArtifact registry that shares this role.
+  NeuralsecBrokerArn:
+    Type: String
+    AllowedPattern: ^arn:aws[a-z-]*:iam::[0-9]{12}:role/.+$
+    ConstraintDescription: An IAM role ARN.
+    Description: ARN of the Neuralsec broker role, the only principal allowed to assume this role.
+  RoleName:
+    Type: String
+    Default: neuralsec-registry-read
+    AllowedPattern: ^[A-Za-z0-9+=,.@_-]{1,64}$
+    ConstraintDescription: An IAM role name of at most 64 characters.
+    Description: Name of the role, the one in the registry role ARN.
+  RolePath:
+    Type: String
+    Default: /
+    AllowedPattern: ^/([A-Za-z0-9+=,.@_/-]*/)?$
+    ConstraintDescription: An IAM path that starts and ends with /.
+    Description: IAM path of the role, the one in the registry role ARN.
+  DomainArns:
+    Type: CommaDelimitedList
+    AllowedPattern: ^arn:aws[a-z-]*:codeartifact:[a-z0-9-]+:[0-9]{12}:domain/[a-z][a-z0-9-]{1,49}$
+    ConstraintDescription: One or more CodeArtifact domain ARNs.
+    Description: Domain ARN of every sibling registry domain. Each one also needs its repository ARN in RepositoryArns.
+  RepositoryArns:
+    Type: CommaDelimitedList
+    AllowedPattern: ^arn:aws[a-z-]*:codeartifact:[a-z0-9-]+:[0-9]{12}:repository/[a-z][a-z0-9-]{1,49}/\*$
+    ConstraintDescription: One or more CodeArtifact repository ARNs, each ending in /*.
+    Description: Repository ARNs of every sibling domain, one per domain in DomainArns.
+
+Resources:
+  CodeArtifactReadRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Ref RoleName
+      Path: !Ref RolePath
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !Ref NeuralsecBrokerArn
+            Action:
+              - sts:AssumeRole
+            Condition:
+              StringEquals:
+                sts:ExternalId: !Ref ExternalIds
+      Policies:
+        - PolicyName: neuralsec-codeartifact-read
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - codeartifact:GetAuthorizationToken
+                Resource: !Ref DomainArns
+              - Effect: Allow
+                Action:
+                  - codeartifact:GetRepositoryEndpoint
+                  - codeartifact:ReadFromRepository
+                Resource: !Ref RepositoryArns
+              - Effect: Allow
+                Action:
+                  - sts:GetServiceBearerToken
+                Resource: "*"
+                Condition:
+                  StringEquals:
+                    sts:AWSServiceName: codeartifact.amazonaws.com
+
+Outputs:
+  RoleArn:
+    Description: ARN of the read-only CodeArtifact role the Neuralsec broker assumes.
+    Value: !GetAtt CodeArtifactReadRole.Arn
