@@ -63,6 +63,14 @@ Resources:
               - cloudfront:GetDistributionConfig
               - cloudfront:ListDistributions
               - cloudfront:ListTagsForResource
+              - cloudtrail:DescribeTrails
+              - cloudtrail:GetEventConfiguration
+              - cloudtrail:GetEventSelectors
+              - cloudtrail:GetInsightSelectors
+              - cloudtrail:GetTrail
+              - cloudtrail:GetTrailStatus
+              - cloudtrail:ListTags
+              - cloudtrail:ListTrails
               - dynamodb:DescribeContinuousBackups
               - dynamodb:DescribeContributorInsights
               - dynamodb:DescribeKinesisStreamingDestination
