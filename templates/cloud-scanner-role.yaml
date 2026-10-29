@@ -94,6 +94,9 @@ Resources:
               - ec2:DescribeVpcPeeringConnections
               - ec2:DescribeVpcs
               - ec2:DescribeVpnGateways
+              - ec2:GetEbsEncryptionByDefault
+              - ec2:GetImageBlockPublicAccessState
+              - ec2:GetSnapshotBlockPublicAccessState
               - ecr:DescribeRepositories
               - ecr:GetLifecyclePolicy
               - ecr:GetRepositoryPolicy
@@ -162,6 +165,7 @@ Resources:
               - rds:DescribeDBClusters
               - rds:DescribeDBInstances
               - s3:GetAccelerateConfiguration
+              - s3:GetAccountPublicAccessBlock
               - s3:GetAnalyticsConfiguration
               - s3:GetBucketAbac
               - s3:GetBucketCORS
