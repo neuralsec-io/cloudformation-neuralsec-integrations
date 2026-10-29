@@ -56,6 +56,7 @@ Resources:
           - Effect: Allow
             Resource: "*"
             Action:
+              - access-analyzer:ListAnalyzers
               - apigateway:GET
               - cloudformation:GetResource
               - cloudformation:ListResources
@@ -146,6 +147,8 @@ Resources:
               - elasticloadbalancing:DescribeTargetGroupAttributes
               - elasticloadbalancing:DescribeTargetGroups
               - elasticloadbalancing:DescribeTargetHealth
+              - guardduty:GetDetector
+              - guardduty:ListDetectors
               - iam:GenerateCredentialReport
               - iam:GetAccessKeyLastUsed
               - iam:GetAccountAuthorizationDetails
