@@ -89,6 +89,7 @@ Resources:
               - ec2:DescribeVolumes
               - ec2:DescribeVpcAttribute
               - ec2:DescribeVpcEncryptionControls
+              - ec2:DescribeVpcEndpointServices
               - ec2:DescribeVpcEndpoints
               - ec2:DescribeVpcPeeringConnections
               - ec2:DescribeVpcs
