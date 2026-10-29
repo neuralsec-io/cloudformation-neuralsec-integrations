@@ -73,6 +73,8 @@ Resources:
               - dynamodb:ListTagsOfResource
               - ec2:DescribeAccountAttributes
               - ec2:DescribeAvailabilityZones
+              - ec2:DescribeImageAttribute
+              - ec2:DescribeImages
               - ec2:DescribeInstanceAttribute
               - ec2:DescribeInstanceCreditSpecifications
               - ec2:DescribeInstances
@@ -83,6 +85,8 @@ Resources:
               - ec2:DescribeNetworkInterfaces
               - ec2:DescribeRouteTables
               - ec2:DescribeSecurityGroups
+              - ec2:DescribeSnapshotAttribute
+              - ec2:DescribeSnapshots
               - ec2:DescribeSubnets
               - ec2:DescribeTags
               - ec2:DescribeTransitGatewayVpcAttachments
@@ -162,8 +166,13 @@ Resources:
               - lambda:GetPolicy
               - lambda:ListFunctionUrlConfigs
               - lambda:ListFunctions
+              - organizations:DescribeOrganization
+              - rds:DescribeDBClusterSnapshotAttributes
+              - rds:DescribeDBClusterSnapshots
               - rds:DescribeDBClusters
               - rds:DescribeDBInstances
+              - rds:DescribeDBSnapshotAttributes
+              - rds:DescribeDBSnapshots
               - s3:GetAccelerateConfiguration
               - s3:GetAccountPublicAccessBlock
               - s3:GetAnalyticsConfiguration
