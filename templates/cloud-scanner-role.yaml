@@ -47,7 +47,7 @@ Resources:
     Type: AWS::IAM::ManagedPolicy
     Properties:
       ManagedPolicyName: neuralsec-cloud-scanner-read-01
-      Description: Neuralsec cloud scanner read actions, part 1 of 2.
+      Description: Neuralsec cloud scanner read actions, part 1 of 1.
       Roles:
         - !Ref ScannerRole
       PolicyDocument:
@@ -229,7 +229,7 @@ Resources:
     Type: AWS::IAM::ManagedPolicy
     Properties:
       ManagedPolicyName: neuralsec-cloud-scanner-read-02
-      Description: Neuralsec cloud scanner read actions, part 2 of 2.
+      Description: Neuralsec cloud scanner read actions, part 2.
       Roles:
         - !Ref ScannerRole
       PolicyDocument:
