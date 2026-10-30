@@ -47,7 +47,7 @@ Resources:
     Type: AWS::IAM::ManagedPolicy
     Properties:
       ManagedPolicyName: neuralsec-cloud-scanner-read-01
-      Description: Neuralsec cloud scanner read actions, part 1 of 1.
+      Description: Neuralsec cloud scanner read actions, part 1 of 2.
       Roles:
         - !Ref ScannerRole
       PolicyDocument:
@@ -180,6 +180,11 @@ Resources:
               - lambda:GetPolicy
               - lambda:ListFunctionUrlConfigs
               - lambda:ListFunctions
+              - logs:DescribeIndexPolicies
+              - logs:DescribeLogGroups
+              - logs:DescribeResourcePolicies
+              - logs:GetDataProtectionPolicy
+              - logs:ListTagsForResource
               - organizations:DescribeOrganization
               - rds:DescribeDBClusterSnapshotAttributes
               - rds:DescribeDBClusterSnapshots
@@ -219,6 +224,20 @@ Resources:
               - sns:ListSubscriptionsByTopic
               - sns:ListTagsForResource
               - sns:ListTopics
+
+  ReadPolicy02:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: neuralsec-cloud-scanner-read-02
+      Description: Neuralsec cloud scanner read actions, part 2 of 2.
+      Roles:
+        - !Ref ScannerRole
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Resource: "*"
+            Action:
               - sqs:GetQueueAttributes
               - sqs:ListQueueTags
               - sqs:ListQueues
