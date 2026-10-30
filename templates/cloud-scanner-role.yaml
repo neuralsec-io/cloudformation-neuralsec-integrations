@@ -124,7 +124,7 @@ Resources:
               - ecs:ListClusters
               - ecs:ListServices
               - ecs:ListTagsForResource
-              - ecs:ListTaskDefinitionFamilies
+              - ecs:ListTaskDefinitions
               - ecs:ListTasks
               - eks:DescribeAccessEntry
               - eks:DescribeCluster
@@ -224,6 +224,7 @@ Resources:
               - sns:ListSubscriptionsByTopic
               - sns:ListTagsForResource
               - sns:ListTopics
+              - sqs:GetQueueAttributes
 
   ReadPolicy02:
     Type: AWS::IAM::ManagedPolicy
@@ -238,7 +239,6 @@ Resources:
           - Effect: Allow
             Resource: "*"
             Action:
-              - sqs:GetQueueAttributes
               - sqs:ListQueueTags
               - sqs:ListQueues
               - ssm:DescribeAssociation
