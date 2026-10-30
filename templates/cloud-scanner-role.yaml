@@ -112,6 +112,7 @@ Resources:
               - ec2:DescribeVpnGateways
               - ec2:GetEbsEncryptionByDefault
               - ec2:GetImageBlockPublicAccessState
+              - ec2:GetInstanceMetadataDefaults
               - ec2:GetSnapshotBlockPublicAccessState
               - ecr:DescribeRepositories
               - ecr:GetLifecyclePolicy
@@ -196,6 +197,7 @@ Resources:
               - s3:GetAccountPublicAccessBlock
               - s3:GetAnalyticsConfiguration
               - s3:GetBucketAbac
+              - s3:GetBucketAcl
               - s3:GetBucketCORS
               - s3:GetBucketLogging
               - s3:GetBucketMetadataTableConfiguration
@@ -222,9 +224,6 @@ Resources:
               - sns:GetDataProtectionPolicy
               - sns:GetTopicAttributes
               - sns:ListSubscriptionsByTopic
-              - sns:ListTagsForResource
-              - sns:ListTopics
-              - sqs:GetQueueAttributes
 
   ReadPolicy02:
     Type: AWS::IAM::ManagedPolicy
@@ -239,6 +238,9 @@ Resources:
           - Effect: Allow
             Resource: "*"
             Action:
+              - sns:ListTagsForResource
+              - sns:ListTopics
+              - sqs:GetQueueAttributes
               - sqs:ListQueueTags
               - sqs:ListQueues
               - ssm:DescribeAssociation
