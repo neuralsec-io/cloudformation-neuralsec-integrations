@@ -118,6 +118,7 @@ Resources:
               - ec2:GetSnapshotBlockPublicAccessState
               - ecr:DescribeRepositories
               - ecr:GetLifecyclePolicy
+              - ecr:GetRegistryScanningConfiguration
               - ecr:GetRepositoryPolicy
               - ecr:ListTagsForResource
               - ecs:DescribeClusters
@@ -170,6 +171,7 @@ Resources:
               - iam:ListInstanceProfiles
               - iam:ListMFADevices
               - iam:ListOpenIDConnectProviders
+              - iam:ListOrganizationsFeatures
               - iam:ListPolicies
               - iam:ListRoles
               - iam:ListSAMLProviders
@@ -222,8 +224,6 @@ Resources:
               - s3:ListBucket
               - s3:ListTagsForResource
               - secretsmanager:DescribeSecret
-              - secretsmanager:GetResourcePolicy
-              - secretsmanager:ListSecrets
 
   ReadPolicy02:
     Type: AWS::IAM::ManagedPolicy
@@ -238,6 +238,8 @@ Resources:
           - Effect: Allow
             Resource: "*"
             Action:
+              - secretsmanager:GetResourcePolicy
+              - secretsmanager:ListSecrets
               - securityhub:DescribeHub
               - sns:GetDataProtectionPolicy
               - sns:GetTopicAttributes
@@ -249,6 +251,9 @@ Resources:
               - sqs:ListQueues
               - ssm:DescribeAssociation
               - ssm:ListAssociations
+              - states:DescribeStateMachine
+              - states:ListStateMachines
+              - states:ListTagsForResource
               - sts:GetCallerIdentity
 
   # cfngen:end account
