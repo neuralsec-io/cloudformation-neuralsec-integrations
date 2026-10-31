@@ -58,6 +58,8 @@ Resources:
             Action:
               - access-analyzer:ListAnalyzers
               - apigateway:GET
+              - bedrock:GetModelInvocationLoggingConfiguration
+              - bedrock:ListGuardrails
               - cloudformation:GetResource
               - cloudformation:ListResources
               - cloudfront:GetDistribution
@@ -72,6 +74,8 @@ Resources:
               - cloudtrail:GetTrailStatus
               - cloudtrail:ListTags
               - cloudtrail:ListTrails
+              - cloudwatch:DescribeAlarms
+              - cloudwatch:ListTagsForResource
               - config:DescribeConfigurationRecorderStatus
               - dynamodb:DescribeContinuousBackups
               - dynamodb:DescribeContributorInsights
@@ -188,9 +192,11 @@ Resources:
               - lambda:ListFunctions
               - logs:DescribeIndexPolicies
               - logs:DescribeLogGroups
+              - logs:DescribeMetricFilters
               - logs:DescribeResourcePolicies
               - logs:GetDataProtectionPolicy
               - logs:ListTagsForResource
+              - macie2:GetMacieSession
               - organizations:DescribeOrganization
               - rds:DescribeDBClusterSnapshotAttributes
               - rds:DescribeDBClusterSnapshots
@@ -198,6 +204,12 @@ Resources:
               - rds:DescribeDBInstances
               - rds:DescribeDBSnapshotAttributes
               - rds:DescribeDBSnapshots
+              - rds:DescribeEventSubscriptions
+              - rds:ListTagsForResource
+              - route53:GetHostedZone
+              - route53:ListHostedZones
+              - route53:ListQueryLoggingConfigs
+              - route53:ListTagsForResource
               - s3:GetAccelerateConfiguration
               - s3:GetAccountPublicAccessBlock
               - s3:GetAnalyticsConfiguration
@@ -211,19 +223,6 @@ Resources:
               - s3:GetBucketOwnershipControls
               - s3:GetBucketPolicy
               - s3:GetBucketPublicAccessBlock
-              - s3:GetBucketTagging
-              - s3:GetBucketVersioning
-              - s3:GetBucketWebsite
-              - s3:GetEncryptionConfiguration
-              - s3:GetIntelligentTieringConfiguration
-              - s3:GetInventoryConfiguration
-              - s3:GetLifecycleConfiguration
-              - s3:GetMetricsConfiguration
-              - s3:GetReplicationConfiguration
-              - s3:ListAllMyBuckets
-              - s3:ListBucket
-              - s3:ListTagsForResource
-              - secretsmanager:DescribeSecret
 
   ReadPolicy02:
     Type: AWS::IAM::ManagedPolicy
@@ -238,6 +237,19 @@ Resources:
           - Effect: Allow
             Resource: "*"
             Action:
+              - s3:GetBucketTagging
+              - s3:GetBucketVersioning
+              - s3:GetBucketWebsite
+              - s3:GetEncryptionConfiguration
+              - s3:GetIntelligentTieringConfiguration
+              - s3:GetInventoryConfiguration
+              - s3:GetLifecycleConfiguration
+              - s3:GetMetricsConfiguration
+              - s3:GetReplicationConfiguration
+              - s3:ListAllMyBuckets
+              - s3:ListBucket
+              - s3:ListTagsForResource
+              - secretsmanager:DescribeSecret
               - secretsmanager:GetResourcePolicy
               - secretsmanager:ListSecrets
               - securityhub:DescribeHub
@@ -255,6 +267,8 @@ Resources:
               - states:ListStateMachines
               - states:ListTagsForResource
               - sts:GetCallerIdentity
+              - wafv2:GetLoggingConfiguration
+              - wafv2:ListWebACLs
 
   # cfngen:end account
 
