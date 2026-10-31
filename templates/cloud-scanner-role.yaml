@@ -72,6 +72,7 @@ Resources:
               - cloudtrail:GetTrailStatus
               - cloudtrail:ListTags
               - cloudtrail:ListTrails
+              - config:DescribeConfigurationRecorderStatus
               - dynamodb:DescribeContinuousBackups
               - dynamodb:DescribeContributorInsights
               - dynamodb:DescribeKinesisStreamingDestination
@@ -82,6 +83,7 @@ Resources:
               - dynamodb:ListTagsOfResource
               - ec2:DescribeAccountAttributes
               - ec2:DescribeAvailabilityZones
+              - ec2:DescribeFlowLogs
               - ec2:DescribeImageAttribute
               - ec2:DescribeImages
               - ec2:DescribeInstanceAttribute
@@ -171,6 +173,7 @@ Resources:
               - iam:ListPolicies
               - iam:ListRoles
               - iam:ListSAMLProviders
+              - inspector2:BatchGetAccountStatus
               - kms:DescribeKey
               - kms:GetKeyPolicy
               - kms:GetKeyRotationStatus
@@ -221,9 +224,6 @@ Resources:
               - secretsmanager:DescribeSecret
               - secretsmanager:GetResourcePolicy
               - secretsmanager:ListSecrets
-              - sns:GetDataProtectionPolicy
-              - sns:GetTopicAttributes
-              - sns:ListSubscriptionsByTopic
 
   ReadPolicy02:
     Type: AWS::IAM::ManagedPolicy
@@ -238,6 +238,10 @@ Resources:
           - Effect: Allow
             Resource: "*"
             Action:
+              - securityhub:DescribeHub
+              - sns:GetDataProtectionPolicy
+              - sns:GetTopicAttributes
+              - sns:ListSubscriptionsByTopic
               - sns:ListTagsForResource
               - sns:ListTopics
               - sqs:GetQueueAttributes
