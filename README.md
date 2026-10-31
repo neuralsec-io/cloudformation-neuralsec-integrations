@@ -24,6 +24,8 @@ Outputs: `RoleArn` (ARN of the scanner role) and `RoleName` (the fixed name `neu
 
 The policy action list is generated from `terraform/modules/policy/actions.json` and is the same list the Terraform module uses. It has no write action and no content read.
 
+IaC state locations are configured through the Terraform module `modules/cloud-scanner-role` only (`state_locations`). A CloudFormation template cannot build the per-location policy document that input produces, so this template grants no object read and the scanner reads no state file for a stack installed this way.
+
 ### cloud-scanner-org-reader.yaml
 
 Parameters: `ExternalId` and `NeuralsecBrokerArn`, as above. Outputs: `RoleArn` and `RoleName` (the fixed name `neuralsec-cloud-scanner-org-reader`). Deploy it once, in the management account or the delegated administrator account, so Neuralsec can discover the accounts of the organization.
