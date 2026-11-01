@@ -57,6 +57,9 @@ Resources:
             Resource: "*"
             Action:
               - access-analyzer:ListAnalyzers
+              - acm:DescribeCertificate
+              - acm:ListCertificates
+              - acm:ListTagsForCertificate
               - apigateway:GET
               - bedrock:GetModelInvocationLoggingConfiguration
               - bedrock:ListGuardrails
@@ -164,6 +167,10 @@ Resources:
               - elasticloadbalancing:DescribeTargetGroupAttributes
               - elasticloadbalancing:DescribeTargetGroups
               - elasticloadbalancing:DescribeTargetHealth
+              - events:ListEventBuses
+              - events:ListRules
+              - events:ListTagsForResource
+              - events:ListTargetsByRule
               - guardduty:GetDetector
               - guardduty:ListDetectors
               - iam:GenerateCredentialReport
@@ -197,6 +204,7 @@ Resources:
               - lambda:GetPolicy
               - lambda:ListFunctionUrlConfigs
               - lambda:ListFunctions
+              - lambda:ListVersionsByFunction
               - logs:DescribeIndexPolicies
               - logs:DescribeLogGroups
               - logs:DescribeMetricFilters
@@ -211,15 +219,8 @@ Resources:
               - rds:DescribeDBInstances
               - rds:DescribeDBSnapshotAttributes
               - rds:DescribeDBSnapshots
+              - rds:DescribeDBSubnetGroups
               - rds:DescribeEventSubscriptions
-              - rds:ListTagsForResource
-              - resource-explorer-2:GetView
-              - resource-explorer-2:ListIndexes
-              - resource-explorer-2:ListViews
-              - resource-explorer-2:Search
-              - route53:GetHostedZone
-              - route53:ListHostedZones
-              - route53:ListQueryLoggingConfigs
 
   ReadPolicy02:
     Type: AWS::IAM::ManagedPolicy
@@ -234,6 +235,14 @@ Resources:
           - Effect: Allow
             Resource: "*"
             Action:
+              - rds:ListTagsForResource
+              - resource-explorer-2:GetView
+              - resource-explorer-2:ListIndexes
+              - resource-explorer-2:ListViews
+              - resource-explorer-2:Search
+              - route53:GetHostedZone
+              - route53:ListHostedZones
+              - route53:ListQueryLoggingConfigs
               - route53:ListTagsForResource
               - s3:GetAccelerateConfiguration
               - s3:GetAccountPublicAccessBlock
@@ -273,6 +282,8 @@ Resources:
               - sqs:ListQueueTags
               - sqs:ListQueues
               - ssm:DescribeAssociation
+              - ssm:DescribeInstanceInformation
+              - ssm:DescribeParameters
               - ssm:ListAssociations
               - states:DescribeStateMachine
               - states:ListStateMachines
