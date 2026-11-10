@@ -77,7 +77,7 @@ Parameters:
 | `NeuralsecOrgSlug` | Neuralsec organization slug, tag `neuralsec:org_slug` |
 | `CreatedAt` | RFC 3339 timestamp, tag `neuralsec:created_at` |
 | `NeuralsecPrincipalArn` | ARN of the Neuralsec role, the only allowed principal |
-| `NeuralsecRegion` | region of the Neuralsec consumer, listed next to the stack region on the endpoint service when it differs |
+| `NeuralsecRegion` | region Neuralsec runs in, default `eu-west-1`, left unset; listed next to the stack region on the endpoint service when it differs |
 | `VpcId` | VPC that holds the service |
 | `SubnetIds` | at least two private subnets for the load balancer |
 | `TargetIp` | private IPv4 address of the service; set exactly one of `TargetIp` and `TargetInstanceId` unless `ExistingNlbArn` is set |

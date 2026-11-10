@@ -40,9 +40,10 @@ Parameters:
     Description: ARN of the Neuralsec role, the only principal allowed to connect to the service.
   NeuralsecRegion:
     Type: String
+    Default: eu-west-1
     AllowedPattern: ^[a-z]{2}(-gov)?-[a-z]+-[0-9]$
     ConstraintDescription: An AWS region name such as eu-west-1.
-    Description: Region of the Neuralsec consumer. It is enabled on the endpoint service when it differs from the region of this stack.
+    Description: Region Neuralsec runs in. It is eu-west-1 and should be left unset; it is enabled on the endpoint service when it differs from the region of this stack.
   VpcId:
     Type: AWS::EC2::VPC::Id
     Description: VPC that holds the service and the subnets of the load balancer.
