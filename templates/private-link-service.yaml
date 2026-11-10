@@ -1,0 +1,266 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: >-
+  Neuralsec private link service. Creates an internal Network Load Balancer in
+  front of a private HTTPS service, such as a package registry, and publishes
+  it as an AWS PrivateLink endpoint service whose only allowed principal is the
+  Neuralsec role. TLS stays end to end: the load balancer does not terminate
+  it, so the service presents its own certificate. Set ExistingNlbArn to
+  publish a load balancer you already have. A stack registers one target,
+  TargetIp or TargetInstanceId; a service behind several addresses needs the
+  Terraform module, which takes a list. After the stack is created, allow the
+  NlbSecurityGroupId output on the target port in the security group of the
+  service itself; that is the one manual step.
+
+Parameters:
+  Name:
+    Type: String
+    AllowedPattern: ^[A-Za-z0-9]([A-Za-z0-9-]{0,17}[A-Za-z0-9])?$
+    ConstraintDescription: 1 to 19 letters, digits or hyphens, starting and ending with a letter or digit.
+    Description: Name of the private link, used in the resource names and the Name tag. It cannot end in a hyphen.
+  NeuralsecOrgId:
+    Type: String
+    AllowedPattern: ^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$
+    ConstraintDescription: A lowercase UUID.
+    Description: Neuralsec organization id, tag neuralsec:org_id.
+  NeuralsecOrgSlug:
+    Type: String
+    AllowedPattern: ^[a-z0-9][a-z0-9-]{1,62}$
+    ConstraintDescription: 2 to 63 lowercase letters, digits or hyphens.
+    Description: Neuralsec organization slug, tag neuralsec:org_slug.
+  CreatedAt:
+    Type: String
+    AllowedPattern: ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\.[0-9]+)?Z$
+    ConstraintDescription: An RFC 3339 UTC timestamp such as 2026-11-10T00:00:00Z.
+    Description: When the link was created, tag neuralsec:created_at.
+  NeuralsecPrincipalArn:
+    Type: String
+    AllowedPattern: ^arn:aws[a-z-]*:iam::[0-9]{12}:role/.+$
+    ConstraintDescription: An IAM role ARN.
+    Description: ARN of the Neuralsec role, the only principal allowed to connect to the service.
+  NeuralsecRegion:
+    Type: String
+    AllowedPattern: ^[a-z]{2}(-gov)?-[a-z]+-[0-9]$
+    ConstraintDescription: An AWS region name such as eu-west-1.
+    Description: Region of the Neuralsec consumer. It is enabled on the endpoint service when it differs from the region of this stack.
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+    Description: VPC that holds the service and the subnets of the load balancer.
+  SubnetIds:
+    Type: List<AWS::EC2::Subnet::Id>
+    Description: Private subnets the load balancer uses, at least one in each of two availability zones.
+  TargetIp:
+    Type: String
+    Default: ""
+    AllowedPattern: ^(([0-9]{1,3}\.){3}[0-9]{1,3})?$
+    ConstraintDescription: Empty or a private IPv4 address.
+    Description: Private IPv4 address of the service. Set exactly one of TargetIp and TargetInstanceId, unless ExistingNlbArn is set.
+  TargetInstanceId:
+    Type: String
+    Default: ""
+    AllowedPattern: ^(i-[0-9a-f]{8,17})?$
+    ConstraintDescription: Empty or an instance id.
+    Description: Instance id of the service. Set exactly one of TargetIp and TargetInstanceId, unless ExistingNlbArn is set.
+  TargetPort:
+    Type: Number
+    Default: 443
+    MinValue: 1
+    MaxValue: 65535
+    Description: TCP port of the target. The listener stays on 443, because Neuralsec connects over HTTPS only.
+  AcceptanceRequired:
+    Type: String
+    Default: "false"
+    AllowedValues:
+      - "true"
+      - "false"
+    Description: Whether a connection request to the endpoint service needs your acceptance.
+  ExistingNlbArn:
+    Type: String
+    Default: ""
+    AllowedPattern: ^(|arn:aws[a-z-]*:elasticloadbalancing:[a-z0-9-]+:[0-9]{12}:loadbalancer/net/.+)$
+    ConstraintDescription: Empty or the ARN of a Network Load Balancer.
+    Description: ARN of an existing internal Network Load Balancer to publish. When set, the stack creates only the endpoint service.
+
+Rules:
+  OneTarget:
+    RuleCondition: !Equals [!Ref ExistingNlbArn, ""]
+    Assertions:
+      - Assert: !Or [!Not [!Equals [!Ref TargetIp, ""]], !Not [!Equals [!Ref TargetInstanceId, ""]]]
+        AssertDescription: Set one of TargetIp and TargetInstanceId.
+      - Assert: !Not [!And [!Not [!Equals [!Ref TargetIp, ""]], !Not [!Equals [!Ref TargetInstanceId, ""]]]]
+        AssertDescription: Do not set both TargetIp and TargetInstanceId.
+
+Conditions:
+  CreateNlb: !Equals [!Ref ExistingNlbArn, ""]
+  IpTargetSet: !And [!Condition CreateNlb, !Not [!Equals [!Ref TargetIp, ""]]]
+  InstanceTargetSet: !And [!Condition CreateNlb, !Not [!Equals [!Ref TargetInstanceId, ""]]]
+  CrossRegion: !Not [!Equals [!Ref NeuralsecRegion, !Ref "AWS::Region"]]
+  NeedsAcceptance: !Equals [!Ref AcceptanceRequired, "true"]
+
+Resources:
+  LoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Condition: CreateNlb
+    Properties:
+      Name: !Sub "neuralsec-pl-${Name}"
+      Type: network
+      Scheme: internal
+      Subnets: !Ref SubnetIds
+      SecurityGroups:
+        - !Ref NlbSecurityGroup
+      EnforceSecurityGroupInboundRulesOnPrivateLinkTraffic: "off"
+      Tags:
+        - Key: neuralsec:component
+          Value: private-link-service
+        - Key: neuralsec:integration-version
+          Value: 0.3.0
+        - Key: neuralsec:org_id
+          Value: !Ref NeuralsecOrgId
+        - Key: neuralsec:org_slug
+          Value: !Ref NeuralsecOrgSlug
+        - Key: neuralsec:created_at
+          Value: !Ref CreatedAt
+        - Key: Name
+          Value: !Ref Name
+
+  NlbSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Condition: CreateNlb
+    Properties:
+      GroupName: !Sub "neuralsec-pl-${Name}"
+      GroupDescription: Neuralsec private link load balancer
+      VpcId: !Ref VpcId
+      # CloudFormation cannot turn a parameter list into one egress rule per
+      # address, so the rule covers the target port on IPv4. The load balancer
+      # only ever forwards to the target registered on it.
+      SecurityGroupEgress:
+        - IpProtocol: tcp
+          FromPort: !Ref TargetPort
+          ToPort: !Ref TargetPort
+          CidrIp: 0.0.0.0/0
+          Description: Neuralsec private link to the service on the target port
+      Tags:
+        - Key: neuralsec:component
+          Value: private-link-service
+        - Key: neuralsec:integration-version
+          Value: 0.3.0
+        - Key: neuralsec:org_id
+          Value: !Ref NeuralsecOrgId
+        - Key: neuralsec:org_slug
+          Value: !Ref NeuralsecOrgSlug
+        - Key: neuralsec:created_at
+          Value: !Ref CreatedAt
+        - Key: Name
+          Value: !Ref Name
+
+  IpTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Condition: IpTargetSet
+    Properties:
+      Name: !Sub "neuralsec-pl-${Name}"
+      Port: !Ref TargetPort
+      Protocol: TCP
+      TargetType: ip
+      VpcId: !Ref VpcId
+      HealthCheckProtocol: TCP
+      HealthCheckPort: !Ref TargetPort
+      Targets:
+        - Id: !Ref TargetIp
+          Port: !Ref TargetPort
+      Tags:
+        - Key: neuralsec:component
+          Value: private-link-service
+        - Key: neuralsec:integration-version
+          Value: 0.3.0
+        - Key: neuralsec:org_id
+          Value: !Ref NeuralsecOrgId
+        - Key: neuralsec:org_slug
+          Value: !Ref NeuralsecOrgSlug
+        - Key: neuralsec:created_at
+          Value: !Ref CreatedAt
+        - Key: Name
+          Value: !Ref Name
+
+  InstanceTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Condition: InstanceTargetSet
+    Properties:
+      Name: !Sub "neuralsec-i-${Name}"
+      Port: !Ref TargetPort
+      Protocol: TCP
+      TargetType: instance
+      VpcId: !Ref VpcId
+      HealthCheckProtocol: TCP
+      HealthCheckPort: !Ref TargetPort
+      Targets:
+        - Id: !Ref TargetInstanceId
+          Port: !Ref TargetPort
+      Tags:
+        - Key: neuralsec:component
+          Value: private-link-service
+        - Key: neuralsec:integration-version
+          Value: 0.3.0
+        - Key: neuralsec:org_id
+          Value: !Ref NeuralsecOrgId
+        - Key: neuralsec:org_slug
+          Value: !Ref NeuralsecOrgSlug
+        - Key: neuralsec:created_at
+          Value: !Ref CreatedAt
+        - Key: Name
+          Value: !Ref Name
+
+  Listener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Condition: CreateNlb
+    Properties:
+      LoadBalancerArn: !GetAtt LoadBalancer.LoadBalancerArn
+      Port: 443
+      Protocol: TCP
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !If [InstanceTargetSet, !Ref InstanceTargetGroup, !Ref IpTargetGroup]
+
+  EndpointService:
+    Type: AWS::EC2::VPCEndpointService
+    Properties:
+      NetworkLoadBalancerArns:
+        - !If [CreateNlb, !GetAtt LoadBalancer.LoadBalancerArn, !Ref ExistingNlbArn]
+      AcceptanceRequired: !If [NeedsAcceptance, true, false]
+      # AWS reports the service's home region among the supported regions, so
+      # the list carries both the stack region and the Neuralsec region: no
+      # drift after the apply, and the remote consumer can connect.
+      SupportedRegions: !If [CrossRegion, [!Ref "AWS::Region", !Ref NeuralsecRegion], !Ref "AWS::NoValue"]
+      Tags:
+        - Key: neuralsec:component
+          Value: private-link-service
+        - Key: neuralsec:integration-version
+          Value: 0.3.0
+        - Key: neuralsec:org_id
+          Value: !Ref NeuralsecOrgId
+        - Key: neuralsec:org_slug
+          Value: !Ref NeuralsecOrgSlug
+        - Key: neuralsec:created_at
+          Value: !Ref CreatedAt
+        - Key: Name
+          Value: !Ref Name
+
+  EndpointServicePermissions:
+    Type: AWS::EC2::VPCEndpointServicePermissions
+    Properties:
+      ServiceId: !Ref EndpointService
+      AllowedPrincipals:
+        - !Ref NeuralsecPrincipalArn
+
+Outputs:
+  ServiceName:
+    Description: Endpoint service name to paste into Neuralsec, com.amazonaws.vpce.<region>.vpce-svc-<id>.
+    Value: !Sub "com.amazonaws.vpce.${AWS::Region}.${EndpointService.ServiceId}"
+  EndpointServiceId:
+    Description: ID of the endpoint service.
+    Value: !GetAtt EndpointService.ServiceId
+  NlbArn:
+    Description: ARN of the load balancer that publishes the service.
+    Value: !If [CreateNlb, !GetAtt LoadBalancer.LoadBalancerArn, !Ref ExistingNlbArn]
+  NlbSecurityGroupId:
+    Description: Security group to allow on the target port in the service security group. Empty with ExistingNlbArn.
+    Value: !If [CreateNlb, !Ref NlbSecurityGroup, ""]

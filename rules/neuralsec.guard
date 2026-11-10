@@ -44,6 +44,16 @@ rule role_trust_requires_external_id {
   }
 }
 
+# A private link endpoint service allows exactly one principal, the
+# NeuralsecPrincipalArn parameter. Never "*" and never a literal ARN: the
+# customer's service is reachable only by the role named at setup time.
+rule private_link_single_principal {
+  Resources.*[ Type == 'AWS::EC2::VPCEndpointServicePermissions' ] {
+    Properties.AllowedPrincipals exists
+    Properties.AllowedPrincipals[*].Ref == 'NeuralsecPrincipalArn'
+  }
+}
+
 # The only principal a role trust policy may allow is the NeuralsecBrokerArn
 # parameter, and the only action is sts:AssumeRole. A literal ARN, "*" or any
 # other principal fails.

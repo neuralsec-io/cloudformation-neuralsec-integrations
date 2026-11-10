@@ -1,6 +1,6 @@
 # Neuralsec CloudFormation integrations
 
-CloudFormation templates for installing Neuralsec into an AWS account or an AWS Organization. Every template creates read-only IAM roles that only the Neuralsec broker can assume, and only with the ExternalId of your connection. Nothing in them creates compute, storage or network resources.
+CloudFormation templates for installing Neuralsec into an AWS account or an AWS Organization. The scanner and registry templates create read-only IAM roles that only the Neuralsec broker can assume, and only with the ExternalId of your connection; the private link template creates the network resources that publish one of your private services. Nothing in them creates compute or storage.
 
 ## Templates
 
@@ -10,6 +10,7 @@ CloudFormation templates for installing Neuralsec into an AWS account or an AWS 
 | `templates/cloud-scanner-org-reader.yaml` | the role `neuralsec-cloud-scanner-org-reader` for the management or delegated administrator account, with the `organizations` read actions only |
 | `templates/cloud-scanner-stackset.yaml` | a service-managed StackSet that deploys `cloud-scanner-role.yaml` to every account of the target organizational units, with auto-deployment on |
 | `templates/codeartifact-read-role.yaml` | a role the broker assumes to read the CodeArtifact domains of your Neuralsec `aws_codeartifact` registries |
+| `templates/private-link-service.yaml` | an internal Network Load Balancer, target group, listener and endpoint service that publish a private HTTPS service to Neuralsec over AWS PrivateLink |
 
 ### cloud-scanner-role.yaml
 
@@ -58,6 +59,41 @@ Parameters:
 
 Output: `RoleArn`. The inline policy `neuralsec-codeartifact-read` grants `codeartifact:GetAuthorizationToken` on the domains, `codeartifact:GetRepositoryEndpoint` and `codeartifact:ReadFromRepository` on the repositories, and `sts:GetServiceBearerToken` restricted to `codeartifact.amazonaws.com`. When another registry starts using the same role, update the stack with its ExternalId instead of creating a second stack.
 
+### private-link-service.yaml
+
+Publishes a private HTTPS service, such as a package registry, to Neuralsec. It
+creates an internal Network Load Balancer in your VPC, a TCP target group, a
+listener on 443 and an endpoint service whose only allowed principal is the
+Neuralsec role. TLS stays end to end: the load balancer does not terminate it.
+A stack registers one target; a service behind several addresses uses the
+Terraform module `modules/private-link-service`, which takes a list.
+
+Parameters:
+
+| Parameter | Description |
+| :--- | :--- |
+| `Name` | name of the link, also the `Name` tag; 1 to 19 letters, digits or hyphens, not ending in a hyphen |
+| `NeuralsecOrgId` | Neuralsec organization id, tag `neuralsec:org_id` |
+| `NeuralsecOrgSlug` | Neuralsec organization slug, tag `neuralsec:org_slug` |
+| `CreatedAt` | RFC 3339 timestamp, tag `neuralsec:created_at` |
+| `NeuralsecPrincipalArn` | ARN of the Neuralsec role, the only allowed principal |
+| `NeuralsecRegion` | region of the Neuralsec consumer, listed next to the stack region on the endpoint service when it differs |
+| `VpcId` | VPC that holds the service |
+| `SubnetIds` | at least two private subnets for the load balancer |
+| `TargetIp` | private IPv4 address of the service; set exactly one of `TargetIp` and `TargetInstanceId` unless `ExistingNlbArn` is set |
+| `TargetInstanceId` | instance id of the service; set exactly one of the two unless `ExistingNlbArn` is set |
+| `TargetPort` | TCP port of the target, default 443; the listener stays on 443 |
+| `AcceptanceRequired` | `true` or `false`, default `false` |
+| `ExistingNlbArn` | ARN of an existing internal Network Load Balancer; when set, the stack creates only the endpoint service |
+
+Outputs: `ServiceName` (paste it into Neuralsec), `EndpointServiceId`, `NlbArn`
+and `NlbSecurityGroupId`. Allow `NlbSecurityGroupId` on the target port in the
+security group of the service itself; that is the one manual step.
+
+Every taggable resource carries `neuralsec:component`,
+`neuralsec:integration-version`, `neuralsec:org_id`, `neuralsec:org_slug`,
+`neuralsec:created_at` and `Name`.
+
 ## Deploying
 
 Neuralsec shows the ExternalId and the broker ARN when you create the connection. Every release is also published, read-only and over HTTPS only, at `https://neuralsec-release-cloudformation-templates.s3.eu-west-1.amazonaws.com/<tag>/<template>` (for example `https://neuralsec-release-cloudformation-templates.s3.eu-west-1.amazonaws.com/v0.2.0/cloud-scanner-role.yaml`), and the rolling `latest/` prefix holds the newest release. Pin a tag for production installs.
@@ -104,6 +140,46 @@ Service-managed StackSets do not deploy to the management account itself. Deploy
 
 These templates do not create EKS access entries: CloudFormation cannot expand a list of cluster names into one `AWS::EKS::AccessEntry` per cluster. Accounts with EKS clusters use the Terraform module `modules/cloud-scanner-role` from `neuralsec-io/terraform-aws-neuralsec-integrations`, which creates the access entries.
 
+The scanner connects to the Kubernetes API from two address families. It prefers IPv6 towards a dual-stack endpoint, and falls back to IPv4.
+
+| Family | Address | Allowed on |
+| :--- | :--- | :--- |
+| IPv6 | `2a05:d018:e21:f00::/56` | a dual-stack (`ipv6`) cluster created after October 2024 |
+| IPv4 | `3.248.10.74/32`, `34.241.8.107/32`, `52.16.218.0/32` | every cluster |
+
+The Terraform module exposes them as `scanner_egress_ipv6_cidrs`, `scanner_egress_ipv4_cidrs` and `scanner_egress_cidrs` (both families, IPv6 first). If the cluster's public endpoint is CIDR restricted, allow the list for your cluster instead of opening the endpoint to `0.0.0.0/0`.
+
+Check the family of the cluster:
+
+```
+aws eks describe-cluster --name example-cluster --region eu-west-1 \
+  --query 'cluster.kubernetesNetworkConfig.ipFamily'
+```
+
+An `ipv6` cluster created after October 2024 accepts IPv4 and IPv6 CIDRs in the same `publicAccessCidrs` list, and its default is `0.0.0.0/0` plus `::/0`. Allow both scanner families there, the `/56` and the three `/32`s, because the scanner prefers IPv6 and falls back to IPv4. Every other cluster (IPv4, or an `ipv6` cluster created before October 2024) accepts IPv4 CIDRs only, so allow the three `/32`s.
+
+For a dual-stack IPv6 cluster created after October 2024:
+
+```
+aws eks update-cluster-config \
+  --name example-cluster \
+  --region eu-west-1 \
+  --resources-vpc-config endpointPublicAccess=true,publicAccessCidrs=2001:db8:1234:5600::/56,198.51.100.0/24,2a05:d018:e21:f00::/56,3.248.10.74/32,34.241.8.107/32,52.16.218.0/32
+```
+
+For every other cluster:
+
+```
+aws eks update-cluster-config \
+  --name example-cluster \
+  --region eu-west-1 \
+  --resources-vpc-config endpointPublicAccess=true,publicAccessCidrs=198.51.100.0/24,3.248.10.74/32,34.241.8.107/32,52.16.218.0/32
+```
+
+`publicAccessCidrs` replaces the whole list, so append the scanner CIDRs to the CIDRs you already allow instead of replacing them (the placeholders `2001:db8:1234:5600::/56` and `198.51.100.0/24` above stand for yours).
+
+A cluster with a private-only endpoint has no public endpoint, so no allow list can reach it from outside. The scanner reports such a cluster as `kubernetes_api_unreadable`; reading the Kubernetes API from inside the VPC is planned. The rest of the cluster's AWS metadata is still inventoried.
+
 ## Guard rules
 
 `rules/neuralsec.guard` holds [cfn-guard](https://github.com/aws-cloudformation/cloudformation-guard) rules that every template must pass before a release. They turn the "read-only, no customer content" promise into a check you can read and run yourself.
@@ -116,6 +192,7 @@ These templates do not create EKS access entries: CloudFormation cannot expand a
 | `no_wildcard_role_trust_actions` | no role trust policy action contains a `*` | the trust policy may only allow `sts:AssumeRole` |
 | `role_trust_only_neuralsec_broker` | every role trust statement is an Allow of `sts:AssumeRole` whose principal is the `NeuralsecBrokerArn` parameter reference; a literal ARN, `*` or any other principal fails | only the Neuralsec broker can ever assume the role |
 | `role_trust_requires_external_id` | every statement of a role trust policy has an `sts:ExternalId` condition | the broker must present the ExternalId of your connection, so no other Neuralsec customer can use the role (confused deputy protection), and there is no condition-free fallback |
+| `private_link_single_principal` | every endpoint service allows only the `NeuralsecPrincipalArn` parameter reference, never `*` and never a literal ARN | the private service is reachable only by the role Neuralsec names at setup time |
 
 ### Running cfn-guard locally
 
