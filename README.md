@@ -65,8 +65,10 @@ Publishes a private HTTPS service, such as a package registry, to Neuralsec. It
 creates an internal Network Load Balancer in your VPC, a TCP target group, a
 listener on 443 and an endpoint service whose only allowed principal is the
 Neuralsec role. TLS stays end to end: the load balancer does not terminate it.
-A stack registers one target; a service behind several addresses uses the
-Terraform module `modules/private-link-service`, which takes a list.
+An internal Application Load Balancer (`TargetAlbArn`) is the recommended
+target: it keeps a stable ARN while its addresses change. A stack registers one
+target; a service behind several addresses uses the Terraform module
+`modules/private-link-service`, which takes a list.
 
 Parameters:
 
@@ -80,15 +82,18 @@ Parameters:
 | `NeuralsecRegion` | region Neuralsec runs in, default `eu-west-1`, left unset; listed next to the stack region on the endpoint service when it differs |
 | `VpcId` | VPC that holds the service |
 | `SubnetIds` | at least two private subnets for the load balancer |
-| `TargetIp` | private IPv4 address of the service; set exactly one of `TargetIp` and `TargetInstanceId` unless `ExistingNlbArn` is set |
-| `TargetInstanceId` | instance id of the service; set exactly one of the two unless `ExistingNlbArn` is set |
-| `TargetPort` | TCP port of the target, default 443; the listener stays on 443 |
+| `TargetAlbArn` | ARN of an internal Application Load Balancer, the recommended target; set exactly one of `TargetAlbArn`, `TargetIp` and `TargetInstanceId`, or `ExistingNlbArn` instead. An ALB target next to `ExistingNlbArn` is rejected |
+| `TargetIp` | private IPv4 address of the service; set exactly one of `TargetAlbArn`, `TargetIp` and `TargetInstanceId` unless `ExistingNlbArn` is set, which ignores it |
+| `TargetInstanceId` | instance id of the service; set exactly one of the three unless `ExistingNlbArn` is set, which ignores it |
+| `TargetPort` | TCP port of the target, default 443; the listener stays on 443. With `TargetAlbArn` it must be the port of an ALB listener |
 | `AcceptanceRequired` | `true` or `false`, default `false` |
-| `ExistingNlbArn` | ARN of an existing internal Network Load Balancer; when set, the stack creates only the endpoint service |
+| `ExistingNlbArn` | ARN of an existing internal Network Load Balancer; when set, the stack creates only the endpoint service and ignores `TargetIp` and `TargetInstanceId` |
 
 Outputs: `ServiceName` (paste it into Neuralsec), `EndpointServiceId`, `NlbArn`
 and `NlbSecurityGroupId`. Allow `NlbSecurityGroupId` on the target port in the
-security group of the service itself; that is the one manual step.
+security group of the service itself, and inbound on the target port in the
+security group of an Application Load Balancer target; that is the one manual
+step.
 
 Every taggable resource carries `neuralsec:component`,
 `neuralsec:integration-version`, `neuralsec:org_id`, `neuralsec:org_slug`,

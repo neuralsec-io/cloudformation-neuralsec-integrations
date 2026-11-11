@@ -5,12 +5,15 @@ Description: >-
   front of a private HTTPS service, such as a package registry, and publishes
   it as an AWS PrivateLink endpoint service whose only allowed principal is the
   Neuralsec role. TLS stays end to end: the load balancer does not terminate
-  it, so the service presents its own certificate. Set ExistingNlbArn to
-  publish a load balancer you already have. A stack registers one target,
+  it, so the service presents its own certificate. Set TargetAlbArn to publish
+  an internal Application Load Balancer, the recommended target: it keeps a
+  stable ARN while its addresses change. Set ExistingNlbArn to publish a load
+  balancer you already have. A stack registers one target, TargetAlbArn,
   TargetIp or TargetInstanceId; a service behind several addresses needs the
   Terraform module, which takes a list. After the stack is created, allow the
   NlbSecurityGroupId output on the target port in the security group of the
-  service itself; that is the one manual step.
+  service itself, and inbound on the target port in the security group of an
+  Application Load Balancer target; that is the one manual step.
 
 Parameters:
   Name:
@@ -50,18 +53,24 @@ Parameters:
   SubnetIds:
     Type: List<AWS::EC2::Subnet::Id>
     Description: Private subnets the load balancer uses, at least one in each of two availability zones.
+  TargetAlbArn:
+    Type: String
+    Default: ""
+    AllowedPattern: ^(|arn:aws[a-z-]*:elasticloadbalancing:[a-z0-9-]+:[0-9]{12}:loadbalancer/app/.+)$
+    ConstraintDescription: Empty or the ARN of an Application Load Balancer.
+    Description: ARN of an internal Application Load Balancer, the recommended target. Set exactly one of TargetAlbArn, TargetIp and TargetInstanceId, or ExistingNlbArn instead. An ALB target next to ExistingNlbArn is rejected. TargetPort must be the port of an ALB listener, 443 by default.
   TargetIp:
     Type: String
     Default: ""
     AllowedPattern: ^(([0-9]{1,3}\.){3}[0-9]{1,3})?$
     ConstraintDescription: Empty or a private IPv4 address.
-    Description: Private IPv4 address of the service. Set exactly one of TargetIp and TargetInstanceId, unless ExistingNlbArn is set.
+    Description: Private IPv4 address of the service. Set exactly one of TargetAlbArn, TargetIp and TargetInstanceId, unless ExistingNlbArn is set, which ignores it.
   TargetInstanceId:
     Type: String
     Default: ""
     AllowedPattern: ^(i-[0-9a-f]{8,17})?$
     ConstraintDescription: Empty or an instance id.
-    Description: Instance id of the service. Set exactly one of TargetIp and TargetInstanceId, unless ExistingNlbArn is set.
+    Description: Instance id of the service. Set exactly one of TargetAlbArn, TargetIp and TargetInstanceId, unless ExistingNlbArn is set, which ignores it.
   TargetPort:
     Type: Number
     Default: 443
@@ -86,13 +95,23 @@ Rules:
   OneTarget:
     RuleCondition: !Equals [!Ref ExistingNlbArn, ""]
     Assertions:
-      - Assert: !Or [!Not [!Equals [!Ref TargetIp, ""]], !Not [!Equals [!Ref TargetInstanceId, ""]]]
-        AssertDescription: Set one of TargetIp and TargetInstanceId.
-      - Assert: !Not [!And [!Not [!Equals [!Ref TargetIp, ""]], !Not [!Equals [!Ref TargetInstanceId, ""]]]]
-        AssertDescription: Do not set both TargetIp and TargetInstanceId.
+      - Assert: !Or [!Not [!Equals [!Ref TargetAlbArn, ""]], !Not [!Equals [!Ref TargetIp, ""]], !Not [!Equals [!Ref TargetInstanceId, ""]]]
+        AssertDescription: Set one of TargetAlbArn, TargetIp and TargetInstanceId.
+      - Assert: !Not [!Or [
+            !And [!Not [!Equals [!Ref TargetAlbArn, ""]], !Not [!Equals [!Ref TargetIp, ""]]],
+            !And [!Not [!Equals [!Ref TargetAlbArn, ""]], !Not [!Equals [!Ref TargetInstanceId, ""]]],
+            !And [!Not [!Equals [!Ref TargetIp, ""]], !Not [!Equals [!Ref TargetInstanceId, ""]]]
+          ]]
+        AssertDescription: Do not set more than one of TargetAlbArn, TargetIp and TargetInstanceId.
+  NoTargetWithExistingNlb:
+    RuleCondition: !Not [!Equals [!Ref ExistingNlbArn, ""]]
+    Assertions:
+      - Assert: !Equals [!Ref TargetAlbArn, ""]
+        AssertDescription: Leave TargetAlbArn empty when ExistingNlbArn is set.
 
 Conditions:
   CreateNlb: !Equals [!Ref ExistingNlbArn, ""]
+  AlbTargetSet: !And [!Condition CreateNlb, !Not [!Equals [!Ref TargetAlbArn, ""]]]
   IpTargetSet: !And [!Condition CreateNlb, !Not [!Equals [!Ref TargetIp, ""]]]
   InstanceTargetSet: !And [!Condition CreateNlb, !Not [!Equals [!Ref TargetInstanceId, ""]]]
   CrossRegion: !Not [!Equals [!Ref NeuralsecRegion, !Ref "AWS::Region"]]
@@ -114,7 +133,7 @@ Resources:
         - Key: neuralsec:component
           Value: private-link-service
         - Key: neuralsec:integration-version
-          Value: 0.3.0
+          Value: 0.3.2
         - Key: neuralsec:org_id
           Value: !Ref NeuralsecOrgId
         - Key: neuralsec:org_slug
@@ -132,8 +151,9 @@ Resources:
       GroupDescription: Neuralsec private link load balancer
       VpcId: !Ref VpcId
       # CloudFormation cannot turn a parameter list into one egress rule per
-      # address, so the rule covers the target port on IPv4. The load balancer
-      # only ever forwards to the target registered on it.
+      # address, so the rule is the target port on IPv4: the load balancer only
+      # ever forwards to the target registered on it, and the range also covers
+      # an Application Load Balancer target, whose addresses move inside the VPC.
       SecurityGroupEgress:
         - IpProtocol: tcp
           FromPort: !Ref TargetPort
@@ -144,7 +164,41 @@ Resources:
         - Key: neuralsec:component
           Value: private-link-service
         - Key: neuralsec:integration-version
-          Value: 0.3.0
+          Value: 0.3.2
+        - Key: neuralsec:org_id
+          Value: !Ref NeuralsecOrgId
+        - Key: neuralsec:org_slug
+          Value: !Ref NeuralsecOrgSlug
+        - Key: neuralsec:created_at
+          Value: !Ref CreatedAt
+        - Key: Name
+          Value: !Ref Name
+
+  AlbTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Condition: AlbTargetSet
+    Properties:
+      Name: !Sub "neuralsec-a-${Name}"
+      Port: !Ref TargetPort
+      Protocol: TCP
+      TargetType: alb
+      VpcId: !Ref VpcId
+      # An alb target group takes a TCP protocol and the ALB listener port, but
+      # AWS requires an HTTP or HTTPS health check for it: HTTPS on the listener
+      # port, so any answer below 500 proves the ALB is up.
+      HealthCheckProtocol: HTTPS
+      HealthCheckPort: !Ref TargetPort
+      HealthCheckPath: /
+      Matcher:
+        HttpCode: 200-499
+      Targets:
+        - Id: !Ref TargetAlbArn
+          Port: !Ref TargetPort
+      Tags:
+        - Key: neuralsec:component
+          Value: private-link-service
+        - Key: neuralsec:integration-version
+          Value: 0.3.2
         - Key: neuralsec:org_id
           Value: !Ref NeuralsecOrgId
         - Key: neuralsec:org_slug
@@ -172,7 +226,7 @@ Resources:
         - Key: neuralsec:component
           Value: private-link-service
         - Key: neuralsec:integration-version
-          Value: 0.3.0
+          Value: 0.3.2
         - Key: neuralsec:org_id
           Value: !Ref NeuralsecOrgId
         - Key: neuralsec:org_slug
@@ -200,7 +254,7 @@ Resources:
         - Key: neuralsec:component
           Value: private-link-service
         - Key: neuralsec:integration-version
-          Value: 0.3.0
+          Value: 0.3.2
         - Key: neuralsec:org_id
           Value: !Ref NeuralsecOrgId
         - Key: neuralsec:org_slug
@@ -219,7 +273,13 @@ Resources:
       Protocol: TCP
       DefaultActions:
         - Type: forward
-          TargetGroupArn: !If [InstanceTargetSet, !Ref InstanceTargetGroup, !Ref IpTargetGroup]
+          TargetGroupArn: !If
+            - InstanceTargetSet
+            - !Ref InstanceTargetGroup
+            - !If
+              - IpTargetSet
+              - !Ref IpTargetGroup
+              - !Ref AlbTargetGroup
 
   EndpointService:
     Type: AWS::EC2::VPCEndpointService
@@ -235,7 +295,7 @@ Resources:
         - Key: neuralsec:component
           Value: private-link-service
         - Key: neuralsec:integration-version
-          Value: 0.3.0
+          Value: 0.3.2
         - Key: neuralsec:org_id
           Value: !Ref NeuralsecOrgId
         - Key: neuralsec:org_slug
@@ -263,5 +323,5 @@ Outputs:
     Description: ARN of the load balancer that publishes the service.
     Value: !If [CreateNlb, !GetAtt LoadBalancer.LoadBalancerArn, !Ref ExistingNlbArn]
   NlbSecurityGroupId:
-    Description: Security group to allow on the target port in the service security group. Empty with ExistingNlbArn.
+    Description: Security group to allow on the target port in the service security group, and inbound on the target port in the security group of an Application Load Balancer target. Empty with ExistingNlbArn.
     Value: !If [CreateNlb, !Ref NlbSecurityGroup, ""]
