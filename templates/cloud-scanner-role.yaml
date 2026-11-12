@@ -276,6 +276,7 @@ Resources:
               - elasticloadbalancing:DescribeListenerAttributes
               - elasticloadbalancing:DescribeListeners
               - elasticloadbalancing:DescribeLoadBalancerAttributes
+              - elasticloadbalancing:DescribeLoadBalancerPolicies
               - elasticloadbalancing:DescribeLoadBalancers
               - elasticloadbalancing:DescribeRules
               - elasticloadbalancing:DescribeTags
@@ -283,6 +284,7 @@ Resources:
               - elasticloadbalancing:DescribeTargetGroups
               - elasticloadbalancing:DescribeTargetHealth
               - elasticmapreduce:DescribeCluster
+              - elasticmapreduce:GetBlockPublicAccessConfiguration
               - elasticmapreduce:ListClusters
               - emr-serverless:GetApplication
               - emr-serverless:ListApplications
@@ -302,9 +304,11 @@ Resources:
               - firehose:ListDeliveryStreams
               - firehose:ListTagsForDeliveryStream
               - glue:GetCrawlers
+              - glue:GetDataCatalogEncryptionSettings
               - glue:GetDatabases
               - glue:GetJob
               - glue:GetRegistry
+              - glue:GetResourcePolicy
               - glue:GetTables
               - glue:GetTags
               - glue:GetTrigger
@@ -385,12 +389,6 @@ Resources:
               - rds:DescribeDBClusterParameterGroups
               - rds:DescribeDBClusterParameters
               - rds:DescribeDBClusterSnapshotAttributes
-              - rds:DescribeDBClusterSnapshots
-              - rds:DescribeDBClusters
-              - rds:DescribeDBInstances
-              - rds:DescribeDBParameterGroups
-              - rds:DescribeDBParameters
-              - rds:DescribeDBSecurityGroups
 
   ReadPolicy03:
     Type: AWS::IAM::ManagedPolicy
@@ -405,6 +403,12 @@ Resources:
           - Effect: Allow
             Resource: "*"
             Action:
+              - rds:DescribeDBClusterSnapshots
+              - rds:DescribeDBClusters
+              - rds:DescribeDBInstances
+              - rds:DescribeDBParameterGroups
+              - rds:DescribeDBParameters
+              - rds:DescribeDBSecurityGroups
               - rds:DescribeDBSnapshotAttributes
               - rds:DescribeDBSnapshots
               - rds:DescribeDBSubnetGroups
