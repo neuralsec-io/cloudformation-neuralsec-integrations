@@ -124,6 +124,7 @@ Resources:
               - cloudtrail:GetTrailStatus
               - cloudtrail:ListTags
               - cloudtrail:ListTrails
+              - cloudtrail:LookupEvents
               - cloudwatch:DescribeAlarms
               - cloudwatch:GetDashboard
               - cloudwatch:ListDashboards
@@ -211,7 +212,6 @@ Resources:
               - ec2:DescribeVpnGateways
               - ec2:GetEbsEncryptionByDefault
               - ec2:GetImageBlockPublicAccessState
-              - ec2:GetInstanceMetadataDefaults
 
   ReadPolicy02:
     Type: AWS::IAM::ManagedPolicy
@@ -226,6 +226,7 @@ Resources:
           - Effect: Allow
             Resource: "*"
             Action:
+              - ec2:GetInstanceMetadataDefaults
               - ec2:GetManagedPrefixListEntries
               - ec2:GetSnapshotBlockPublicAccessState
               - ec2:GetTransitGatewayRouteTableAssociations
@@ -374,6 +375,7 @@ Resources:
               - macie2:GetMacieSession
               - network-firewall:DescribeFirewall
               - network-firewall:DescribeFirewallPolicy
+              - network-firewall:DescribeLoggingConfiguration
               - network-firewall:DescribeRuleGroup
               - network-firewall:ListFirewallPolicies
               - network-firewall:ListFirewalls
@@ -389,9 +391,6 @@ Resources:
               - rds:DescribeDBParameterGroups
               - rds:DescribeDBParameters
               - rds:DescribeDBSecurityGroups
-              - rds:DescribeDBSnapshotAttributes
-              - rds:DescribeDBSnapshots
-              - rds:DescribeDBSubnetGroups
 
   ReadPolicy03:
     Type: AWS::IAM::ManagedPolicy
@@ -406,6 +405,9 @@ Resources:
           - Effect: Allow
             Resource: "*"
             Action:
+              - rds:DescribeDBSnapshotAttributes
+              - rds:DescribeDBSnapshots
+              - rds:DescribeDBSubnetGroups
               - rds:DescribeEventSubscriptions
               - rds:ListTagsForResource
               - redshift:DescribeClusterParameterGroups
@@ -414,6 +416,7 @@ Resources:
               - redshift:DescribeClusterSnapshots
               - redshift:DescribeClusterSubnetGroups
               - redshift:DescribeClusters
+              - redshift:DescribeLoggingStatus
               - resource-explorer-2:GetView
               - resource-explorer-2:ListIndexes
               - resource-explorer-2:ListViews
@@ -463,6 +466,7 @@ Resources:
               - sagemaker:ListDomains
               - sagemaker:ListEndpointConfigs
               - sagemaker:ListEndpoints
+              - sagemaker:ListImageVersions
               - sagemaker:ListImages
               - sagemaker:ListModels
               - sagemaker:ListTags
@@ -500,6 +504,7 @@ Resources:
               - states:ListStateMachines
               - states:ListTagsForResource
               - sts:GetCallerIdentity
+              - tag:GetResources
               - timestream-influxdb:GetDbInstance
               - timestream-influxdb:ListDbInstances
               - timestream-influxdb:ListTagsForResource
