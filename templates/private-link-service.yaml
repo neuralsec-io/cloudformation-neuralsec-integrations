@@ -8,7 +8,7 @@ Description: >-
   it, so the service presents its own certificate. Set TargetAlbArn to publish
   an internal Application Load Balancer, the recommended target: it keeps a
   stable ARN while its addresses change. Set ExistingNlbArn to publish a load
-  balancer you already have. A stack registers one target, TargetAlbArn,
+  balancer you already have. HttpTargetPort adds plain HTTP on port 80. A stack registers one target, TargetAlbArn,
   TargetIp or TargetInstanceId; a service behind several addresses needs the
   Terraform module, which takes a list. After the stack is created, allow the
   NlbSecurityGroupId output on the target port in the security group of the
@@ -76,7 +76,13 @@ Parameters:
     Default: 443
     MinValue: 1
     MaxValue: 65535
-    Description: TCP port of the target. The listener stays on 443, because Neuralsec connects over HTTPS only.
+    Description: TCP port of the target. The listener on 443 is HTTPS.
+  HttpTargetPort:
+    Type: Number
+    Default: 0
+    MinValue: 0
+    MaxValue: 65535
+    Description: Optional. TCP port of the target for plain HTTP; 0 disables it. When set, the load balancer also listens on TCP 80 and forwards to a second target group on this port, with the same target as the 443 path. Plain HTTP is supported only through this private connection, on port 80. Prefer HTTPS. Ignored with ExistingNlbArn; add the TCP 80 listener to your load balancer yourself.
   AcceptanceRequired:
     Type: String
     Default: "false"
@@ -114,6 +120,8 @@ Conditions:
   AlbTargetSet: !And [!Condition CreateNlb, !Not [!Equals [!Ref TargetAlbArn, ""]]]
   IpTargetSet: !And [!Condition CreateNlb, !Not [!Equals [!Ref TargetIp, ""]]]
   InstanceTargetSet: !And [!Condition CreateNlb, !Not [!Equals [!Ref TargetInstanceId, ""]]]
+  HttpEnabled: !And [!Condition CreateNlb, !Not [!Equals [!Ref HttpTargetPort, 0]]]
+  HttpEgress: !And [!Condition HttpEnabled, !Not [!Equals [!Ref HttpTargetPort, !Ref TargetPort]]]
   CrossRegion: !Not [!Equals [!Ref NeuralsecRegion, !Ref "AWS::Region"]]
   NeedsAcceptance: !Equals [!Ref AcceptanceRequired, "true"]
 
@@ -280,6 +288,62 @@ Resources:
               - IpTargetSet
               - !Ref IpTargetGroup
               - !Ref AlbTargetGroup
+
+  HttpEgressRule:
+    Type: AWS::EC2::SecurityGroupEgress
+    Condition: HttpEgress
+    Properties:
+      GroupId: !Ref NlbSecurityGroup
+      IpProtocol: tcp
+      FromPort: !Ref HttpTargetPort
+      ToPort: !Ref HttpTargetPort
+      CidrIp: 0.0.0.0/0
+      Description: Neuralsec private link to the service on the HTTP target port
+
+  HttpTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Condition: HttpEnabled
+    Properties:
+      Name: !Sub "neuralsec-h-${Name}"
+      Port: !Ref HttpTargetPort
+      Protocol: TCP
+      TargetType: !If [InstanceTargetSet, instance, !If [IpTargetSet, ip, alb]]
+      VpcId: !Ref VpcId
+      # TCP health check; an alb target group needs an HTTP one instead.
+      HealthCheckProtocol: !If [AlbTargetSet, HTTP, TCP]
+      HealthCheckPort: !Ref HttpTargetPort
+      HealthCheckPath: !If [AlbTargetSet, /, !Ref "AWS::NoValue"]
+      Matcher: !If
+        - AlbTargetSet
+        - HttpCode: 200-499
+        - !Ref "AWS::NoValue"
+      Targets:
+        - Id: !If [InstanceTargetSet, !Ref TargetInstanceId, !If [IpTargetSet, !Ref TargetIp, !Ref TargetAlbArn]]
+          Port: !Ref HttpTargetPort
+      Tags:
+        - Key: neuralsec:component
+          Value: private-link-service
+        - Key: neuralsec:integration-version
+          Value: 0.3.2
+        - Key: neuralsec:org_id
+          Value: !Ref NeuralsecOrgId
+        - Key: neuralsec:org_slug
+          Value: !Ref NeuralsecOrgSlug
+        - Key: neuralsec:created_at
+          Value: !Ref CreatedAt
+        - Key: Name
+          Value: !Ref Name
+
+  HttpListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Condition: HttpEnabled
+    Properties:
+      LoadBalancerArn: !GetAtt LoadBalancer.LoadBalancerArn
+      Port: 80
+      Protocol: TCP
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref HttpTargetGroup
 
   EndpointService:
     Type: AWS::EC2::VPCEndpointService
