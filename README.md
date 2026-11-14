@@ -86,7 +86,7 @@ Parameters:
 | `TargetIp` | private IPv4 address of the service; set exactly one of `TargetAlbArn`, `TargetIp` and `TargetInstanceId` unless `ExistingNlbArn` is set, which ignores it |
 | `TargetInstanceId` | instance id of the service; set exactly one of the three unless `ExistingNlbArn` is set, which ignores it |
 | `TargetPort` | TCP port of the target, default 443; the listener stays on 443. With `TargetAlbArn` it must be the port of an ALB listener |
-| `AcceptanceRequired` | `true` or `false`, default `false` |
+| `AcceptanceRequired` | `true` or `false`, default `true`: accept the connection request yourself in the VPC console, after checking that its endpoint ID matches the one shown in the Neuralsec app |
 | `ExistingNlbArn` | ARN of an existing internal Network Load Balancer; when set, the stack creates only the endpoint service and ignores `TargetIp` and `TargetInstanceId` |
 
 Outputs: `ServiceName` (paste it into Neuralsec), `EndpointServiceId`, `NlbArn`
