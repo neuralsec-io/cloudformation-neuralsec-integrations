@@ -69,10 +69,15 @@ Resources:
               - application-autoscaling:DescribeScalingPolicies
               - application-autoscaling:DescribeScheduledActions
               - application-autoscaling:ListTagsForResource
+              - appstream:DescribeFleets
+              - appstream:ListTagsForResource
               - appsync:GetGraphqlApi
               - appsync:GetGraphqlApiEnvironmentVariables
               - appsync:ListGraphqlApis
               - appsync:ListTagsForResource
+              - athena:GetWorkGroup
+              - athena:ListTagsForResource
+              - athena:ListWorkGroups
               - autoscaling:DescribeAutoScalingGroups
               - autoscaling:DescribeLaunchConfigurations
               - autoscaling:DescribePolicies
@@ -95,8 +100,10 @@ Resources:
               - bedrock-mantle:GetProject
               - bedrock-mantle:ListProjects
               - bedrock-mantle:ListTagsForResource
+              - bedrock:GetDataSource
               - bedrock:GetKnowledgeBase
               - bedrock:GetModelInvocationLoggingConfiguration
+              - bedrock:ListDataSources
               - bedrock:ListGuardrails
               - bedrock:ListKnowledgeBases
               - bedrock:ListTagsForResource
@@ -159,6 +166,10 @@ Resources:
               - codepipeline:ListWebhooks
               - codestar-notifications:DescribeNotificationRule
               - codestar-notifications:ListNotificationRules
+              - cognito-identity:DescribeIdentityPool
+              - cognito-identity:GetIdentityPoolRoles
+              - cognito-identity:ListIdentityPools
+              - cognito-identity:ListTagsForResource
               - config:DescribeComplianceByConfigRule
               - config:DescribeConfigRules
               - config:DescribeConfigurationAggregators
@@ -186,6 +197,8 @@ Resources:
               - dms:DescribeReplicationInstances
               - dms:DescribeReplicationTasks
               - dms:ListTagsForResource
+              - ds:DescribeDirectories
+              - ds:ListTagsForResource
               - dynamodb:DescribeContinuousBackups
               - dynamodb:DescribeContributorInsights
               - dynamodb:DescribeKinesisStreamingDestination
@@ -198,19 +211,6 @@ Resources:
               - ec2:DescribeAddresses
               - ec2:DescribeAvailabilityZones
               - ec2:DescribeCarrierGateways
-              - ec2:DescribeClientVpnAuthorizationRules
-              - ec2:DescribeClientVpnEndpoints
-              - ec2:DescribeClientVpnRoutes
-              - ec2:DescribeClientVpnTargetNetworks
-              - ec2:DescribeCustomerGateways
-              - ec2:DescribeDhcpOptions
-              - ec2:DescribeFlowLogs
-              - ec2:DescribeImageAttribute
-              - ec2:DescribeImages
-              - ec2:DescribeInstanceAttribute
-              - ec2:DescribeInstanceCreditSpecifications
-              - ec2:DescribeInstances
-              - ec2:DescribeInternetGateways
 
   ReadPolicy02:
     Type: AWS::IAM::ManagedPolicy
@@ -225,6 +225,19 @@ Resources:
           - Effect: Allow
             Resource: "*"
             Action:
+              - ec2:DescribeClientVpnAuthorizationRules
+              - ec2:DescribeClientVpnEndpoints
+              - ec2:DescribeClientVpnRoutes
+              - ec2:DescribeClientVpnTargetNetworks
+              - ec2:DescribeCustomerGateways
+              - ec2:DescribeDhcpOptions
+              - ec2:DescribeFlowLogs
+              - ec2:DescribeImageAttribute
+              - ec2:DescribeImages
+              - ec2:DescribeInstanceAttribute
+              - ec2:DescribeInstanceCreditSpecifications
+              - ec2:DescribeInstances
+              - ec2:DescribeInternetGateways
               - ec2:DescribeLaunchTemplateVersions
               - ec2:DescribeLaunchTemplates
               - ec2:DescribeManagedPrefixLists
@@ -338,6 +351,7 @@ Resources:
               - glue:GetCrawlers
               - glue:GetDataCatalogEncryptionSettings
               - glue:GetDatabases
+              - glue:GetDevEndpoints
               - glue:GetJob
               - glue:GetRegistry
               - glue:GetResourcePolicy
@@ -372,20 +386,6 @@ Resources:
               - iam:ListPolicies
               - iam:ListRoles
               - iam:ListSAMLProviders
-              - iam:ListServerCertificates
-              - iam:ListVirtualMFADevices
-              - inspector2:BatchGetAccountStatus
-              - kafka:DescribeCluster
-              - kafka:DescribeConfiguration
-              - kafka:ListClusters
-              - kafka:ListConfigurations
-              - kafkaconnect:DescribeConnector
-              - kafkaconnect:DescribeWorkerConfiguration
-              - kafkaconnect:ListConnectors
-              - kafkaconnect:ListTagsForResource
-              - kafkaconnect:ListWorkerConfigurations
-              - kinesis:DescribeStreamSummary
-              - kinesis:ListStreams
 
   ReadPolicy03:
     Type: AWS::IAM::ManagedPolicy
@@ -400,6 +400,20 @@ Resources:
           - Effect: Allow
             Resource: "*"
             Action:
+              - iam:ListServerCertificates
+              - iam:ListVirtualMFADevices
+              - inspector2:BatchGetAccountStatus
+              - kafka:DescribeCluster
+              - kafka:DescribeConfiguration
+              - kafka:ListClusters
+              - kafka:ListConfigurations
+              - kafkaconnect:DescribeConnector
+              - kafkaconnect:DescribeWorkerConfiguration
+              - kafkaconnect:ListConnectors
+              - kafkaconnect:ListTagsForResource
+              - kafkaconnect:ListWorkerConfigurations
+              - kinesis:DescribeStreamSummary
+              - kinesis:ListStreams
               - kinesis:ListTagsForResource
               - kinesis:ListTagsForStream
               - kms:DescribeKey
@@ -424,6 +438,8 @@ Resources:
               - lightsail:GetInstances
               - lightsail:GetRelationalDatabase
               - lightsail:GetRelationalDatabases
+              - lightsail:GetStaticIp
+              - lightsail:GetStaticIps
               - logs:DescribeIndexPolicies
               - logs:DescribeLogGroups
               - logs:DescribeMetricFilters
@@ -433,6 +449,8 @@ Resources:
               - logs:ListTagsForResource
               - macie2:GetAutomatedDiscoveryConfiguration
               - macie2:GetMacieSession
+              - memorydb:DescribeClusters
+              - memorydb:ListTags
               - mq:DescribeBroker
               - mq:DescribeSharedResources
               - mq:ListBrokers
@@ -483,6 +501,9 @@ Resources:
               - route53:ListQueryLoggingConfigs
               - route53:ListResourceRecordSets
               - route53:ListTagsForResource
+              - route53domains:GetDomainDetail
+              - route53domains:ListDomains
+              - route53domains:ListTagsForDomain
               - s3:GetAccelerateConfiguration
               - s3:GetAccessPoint
               - s3:GetAccessPointPolicy
@@ -520,6 +541,7 @@ Resources:
               - sagemaker:DescribeImageVersion
               - sagemaker:DescribeModel
               - sagemaker:DescribeNotebookInstance
+              - sagemaker:DescribeTrainingJob
               - sagemaker:DescribeUserProfile
               - sagemaker:ListAppImageConfigs
               - sagemaker:ListDomains
@@ -530,6 +552,7 @@ Resources:
               - sagemaker:ListModels
               - sagemaker:ListNotebookInstances
               - sagemaker:ListTags
+              - sagemaker:ListTrainingJobs
               - sagemaker:ListUserProfiles
               - scheduler:GetSchedule
               - scheduler:ListSchedules
@@ -547,8 +570,23 @@ Resources:
               - servicediscovery:GetServiceAttributes
               - servicediscovery:ListNamespaces
               - servicediscovery:ListServices
+
+  ReadPolicy04:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: neuralsec-cloud-scanner-read-04
+      Description: Neuralsec cloud scanner read actions, part 4.
+      Roles:
+        - !Ref ScannerRole
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Resource: "*"
+            Action:
               - servicediscovery:ListTagsForResource
               - shield:DescribeProtection
+              - shield:GetSubscriptionState
               - shield:ListProtections
               - shield:ListTagsForResource
               - sns:GetDataProtectionPolicy
@@ -568,24 +606,15 @@ Resources:
               - states:DescribeStateMachine
               - states:ListStateMachines
               - states:ListTagsForResource
+              - storagegateway:DescribeGatewayInformation
+              - storagegateway:DescribeNFSFileShares
+              - storagegateway:DescribeSMBFileShares
+              - storagegateway:ListFileShares
+              - storagegateway:ListGateways
               - sts:GetCallerIdentity
               - tag:GetResources
               - timestream-influxdb:GetDbInstance
               - timestream-influxdb:ListDbInstances
-
-  ReadPolicy04:
-    Type: AWS::IAM::ManagedPolicy
-    Properties:
-      ManagedPolicyName: neuralsec-cloud-scanner-read-04
-      Description: Neuralsec cloud scanner read actions, part 4.
-      Roles:
-        - !Ref ScannerRole
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Resource: "*"
-            Action:
               - timestream-influxdb:ListTagsForResource
               - transfer:DescribeServer
               - transfer:ListServers
