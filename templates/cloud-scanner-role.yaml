@@ -90,6 +90,7 @@ Resources:
               - backup:ListBackupPlans
               - backup:ListBackupSelections
               - backup:ListBackupVaults
+              - backup:ListRecoveryPointsByBackupVault
               - backup:ListTags
               - batch:DescribeJobDefinitions
               - bedrock-agentcore:GetAgentRuntime
@@ -211,7 +212,6 @@ Resources:
               - ds:ListLogSubscriptions
               - ds:ListTagsForResource
               - dynamodb:DescribeContinuousBackups
-              - dynamodb:DescribeContributorInsights
 
   ReadPolicy02:
     Type: AWS::IAM::ManagedPolicy
@@ -226,6 +226,7 @@ Resources:
           - Effect: Allow
             Resource: "*"
             Action:
+              - dynamodb:DescribeContributorInsights
               - dynamodb:DescribeKinesisStreamingDestination
               - dynamodb:DescribeTable
               - dynamodb:DescribeTimeToLive
@@ -350,9 +351,11 @@ Resources:
               - es:ListTags
               - events:DescribeApiDestination
               - events:DescribeConnection
+              - events:DescribeEndpoint
               - events:DescribeEventBus
               - events:ListApiDestinations
               - events:ListConnections
+              - events:ListEndpoints
               - events:ListEventBuses
               - events:ListRules
               - events:ListTagsForResource
@@ -377,10 +380,6 @@ Resources:
               - glue:GetMLTransforms
               - glue:GetRegistry
               - glue:GetResourcePolicy
-              - glue:GetSecurityConfiguration
-              - glue:GetSecurityConfigurations
-              - glue:GetTables
-              - glue:GetTags
 
   ReadPolicy03:
     Type: AWS::IAM::ManagedPolicy
@@ -395,6 +394,10 @@ Resources:
           - Effect: Allow
             Resource: "*"
             Action:
+              - glue:GetSecurityConfiguration
+              - glue:GetSecurityConfigurations
+              - glue:GetTables
+              - glue:GetTags
               - glue:GetTrigger
               - glue:ListJobs
               - glue:ListMLTransforms
@@ -566,9 +569,6 @@ Resources:
               - sagemaker:DescribeApp
               - sagemaker:DescribeAppImageConfig
               - sagemaker:DescribeDomain
-              - sagemaker:DescribeEndpoint
-              - sagemaker:DescribeEndpointConfig
-              - sagemaker:DescribeImage
 
   ReadPolicy04:
     Type: AWS::IAM::ManagedPolicy
@@ -583,6 +583,9 @@ Resources:
           - Effect: Allow
             Resource: "*"
             Action:
+              - sagemaker:DescribeEndpoint
+              - sagemaker:DescribeEndpointConfig
+              - sagemaker:DescribeImage
               - sagemaker:DescribeImageVersion
               - sagemaker:DescribeModel
               - sagemaker:DescribeNotebookInstance
@@ -682,6 +685,7 @@ Resources:
               - wafv2:ListTagsForResource
               - wafv2:ListWebACLs
               - workspaces:DescribeTags
+              - workspaces:DescribeWorkspaceDirectories
               - workspaces:DescribeWorkspaces
 
   # cfngen:end account
