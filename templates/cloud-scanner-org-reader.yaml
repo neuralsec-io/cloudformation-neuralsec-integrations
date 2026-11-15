@@ -57,6 +57,7 @@ Resources:
               - organizations:DescribeOrganization
               - organizations:DescribeOrganizationalUnit
               - organizations:DescribePolicy
+              - organizations:ListAWSServiceAccessForOrganization
               - organizations:ListAccounts
               - organizations:ListAccountsForParent
               - organizations:ListDelegatedAdministrators

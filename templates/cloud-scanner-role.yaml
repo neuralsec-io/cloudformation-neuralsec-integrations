@@ -263,6 +263,7 @@ Resources:
               - ec2:DescribeVpcAttribute
               - ec2:DescribeVpcEncryptionControls
               - ec2:DescribeVpcEndpointServiceConfigurations
+              - ec2:DescribeVpcEndpointServicePermissions
               - ec2:DescribeVpcEndpointServices
               - ec2:DescribeVpcEndpoints
               - ec2:DescribeVpcPeeringConnections
@@ -351,6 +352,10 @@ Resources:
               - firehose:DescribeDeliveryStream
               - firehose:ListDeliveryStreams
               - firehose:ListTagsForDeliveryStream
+              - glacier:GetVaultAccessPolicy
+              - glacier:GetVaultLock
+              - glacier:ListTagsForVault
+              - glacier:ListVaults
               - globalaccelerator:DescribeAccelerator
               - globalaccelerator:DescribeAcceleratorAttributes
               - globalaccelerator:ListAccelerators
@@ -378,12 +383,6 @@ Resources:
               - iam:GetAccountPasswordPolicy
               - iam:GetAccountSummary
               - iam:GetCredentialReport
-              - iam:GetLoginProfile
-              - iam:GetOpenIDConnectProvider
-              - iam:GetPolicy
-              - iam:GetPolicyVersion
-              - iam:GetSAMLProvider
-              - iam:GetServerCertificate
 
   ReadPolicy03:
     Type: AWS::IAM::ManagedPolicy
@@ -398,6 +397,12 @@ Resources:
           - Effect: Allow
             Resource: "*"
             Action:
+              - iam:GetLoginProfile
+              - iam:GetOpenIDConnectProvider
+              - iam:GetPolicy
+              - iam:GetPolicyVersion
+              - iam:GetSAMLProvider
+              - iam:GetServerCertificate
               - iam:ListAccessKeys
               - iam:ListEntitiesForPolicy
               - iam:ListInstanceProfiles
@@ -501,6 +506,11 @@ Resources:
               - resource-explorer-2:ListIndexes
               - resource-explorer-2:ListViews
               - resource-explorer-2:Search
+              - rolesanywhere:GetProfile
+              - rolesanywhere:GetTrustAnchor
+              - rolesanywhere:ListProfiles
+              - rolesanywhere:ListTagsForResource
+              - rolesanywhere:ListTrustAnchors
               - route53:GetHealthCheck
               - route53:GetHostedZone
               - route53:ListHealthChecks
@@ -534,10 +544,12 @@ Resources:
               - s3:GetInventoryConfiguration
               - s3:GetLifecycleConfiguration
               - s3:GetMetricsConfiguration
+              - s3:GetMultiRegionAccessPoint
               - s3:GetReplicationConfiguration
               - s3:ListAccessPoints
               - s3:ListAllMyBuckets
               - s3:ListBucket
+              - s3:ListMultiRegionAccessPoints
               - s3:ListTagsForResource
               - sagemaker:DescribeApp
               - sagemaker:DescribeAppImageConfig
@@ -558,18 +570,6 @@ Resources:
               - sagemaker:ListImages
               - sagemaker:ListModels
               - sagemaker:ListNotebookInstances
-              - sagemaker:ListTags
-              - sagemaker:ListTrainingJobs
-              - sagemaker:ListUserProfiles
-              - scheduler:GetSchedule
-              - scheduler:ListSchedules
-              - schemas:DescribeRegistry
-              - schemas:ListRegistries
-              - secretsmanager:DescribeSecret
-              - secretsmanager:GetResourcePolicy
-              - secretsmanager:ListSecrets
-              - securityhub:DescribeHub
-              - servicecatalog:DescribePortfolio
 
   ReadPolicy04:
     Type: AWS::IAM::ManagedPolicy
@@ -584,6 +584,20 @@ Resources:
           - Effect: Allow
             Resource: "*"
             Action:
+              - sagemaker:ListTags
+              - sagemaker:ListTrainingJobs
+              - sagemaker:ListUserProfiles
+              - scheduler:GetSchedule
+              - scheduler:ListSchedules
+              - schemas:DescribeRegistry
+              - schemas:GetResourcePolicy
+              - schemas:ListRegistries
+              - secretsmanager:DescribeSecret
+              - secretsmanager:GetResourcePolicy
+              - secretsmanager:ListSecrets
+              - securityhub:DescribeHub
+              - servicecatalog:DescribePortfolio
+              - servicecatalog:DescribePortfolioShares
               - servicecatalog:ListPortfolios
               - servicecatalog:ListTagsForResource
               - servicediscovery:GetNamespace
@@ -592,6 +606,9 @@ Resources:
               - servicediscovery:ListNamespaces
               - servicediscovery:ListServices
               - servicediscovery:ListTagsForResource
+              - ses:GetEmailIdentity
+              - ses:GetEmailIdentityPolicies
+              - ses:ListEmailIdentities
               - shield:DescribeProtection
               - shield:GetSubscriptionState
               - shield:ListProtections
@@ -607,9 +624,11 @@ Resources:
               - sqs:ListQueueTags
               - sqs:ListQueues
               - ssm:DescribeAssociation
+              - ssm:DescribeDocumentPermission
               - ssm:DescribeInstanceInformation
               - ssm:DescribeParameters
               - ssm:ListAssociations
+              - ssm:ListDocuments
               - states:DescribeStateMachine
               - states:ListStateMachines
               - states:ListTagsForResource
