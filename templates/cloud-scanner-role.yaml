@@ -477,6 +477,7 @@ Resources:
               - macie2:GetAutomatedDiscoveryConfiguration
               - macie2:GetMacieSession
               - memorydb:DescribeClusters
+              - memorydb:DescribeSubnetGroups
               - memorydb:ListTags
               - mq:DescribeBroker
               - mq:DescribeSharedResources
@@ -568,7 +569,6 @@ Resources:
               - s3:ListTagsForResource
               - sagemaker:DescribeApp
               - sagemaker:DescribeAppImageConfig
-              - sagemaker:DescribeDomain
 
   ReadPolicy04:
     Type: AWS::IAM::ManagedPolicy
@@ -583,6 +583,7 @@ Resources:
           - Effect: Allow
             Resource: "*"
             Action:
+              - sagemaker:DescribeDomain
               - sagemaker:DescribeEndpoint
               - sagemaker:DescribeEndpointConfig
               - sagemaker:DescribeImage
