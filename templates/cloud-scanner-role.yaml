@@ -155,6 +155,8 @@ Resources:
               - codeartifact:GetDomainPermissionsPolicy
               - codeartifact:GetRepositoryPermissionsPolicy
               - codeartifact:ListDomains
+              - codeartifact:ListPackageVersions
+              - codeartifact:ListPackages
               - codeartifact:ListRepositories
               - codeartifact:ListTagsForResource
               - codebuild:BatchGetProjects
@@ -208,9 +210,6 @@ Resources:
               - dms:DescribeReplicationTasks
               - dms:ListTagsForResource
               - ds:DescribeDirectories
-              - ds:DescribeEventTopics
-              - ds:ListCertificates
-              - ds:ListLogSubscriptions
 
   ReadPolicy02:
     Type: AWS::IAM::ManagedPolicy
@@ -225,6 +224,9 @@ Resources:
           - Effect: Allow
             Resource: "*"
             Action:
+              - ds:DescribeEventTopics
+              - ds:ListCertificates
+              - ds:ListLogSubscriptions
               - ds:ListTagsForResource
               - dynamodb:DescribeContinuousBackups
               - dynamodb:DescribeContributorInsights
@@ -376,10 +378,6 @@ Resources:
               - glue:GetDataCatalogEncryptionSettings
               - glue:GetDatabases
               - glue:GetDevEndpoints
-              - glue:GetJob
-              - glue:GetMLTransform
-              - glue:GetMLTransforms
-              - glue:GetRegistry
 
   ReadPolicy03:
     Type: AWS::IAM::ManagedPolicy
@@ -394,6 +392,10 @@ Resources:
           - Effect: Allow
             Resource: "*"
             Action:
+              - glue:GetJob
+              - glue:GetMLTransform
+              - glue:GetMLTransforms
+              - glue:GetRegistry
               - glue:GetResourcePolicy
               - glue:GetSecurityConfiguration
               - glue:GetSecurityConfigurations
@@ -566,9 +568,6 @@ Resources:
               - s3:GetReplicationConfiguration
               - s3:ListAccessPoints
               - s3:ListAllMyBuckets
-              - s3:ListBucket
-              - s3:ListMultiRegionAccessPoints
-              - s3:ListTagsForResource
 
   ReadPolicy04:
     Type: AWS::IAM::ManagedPolicy
@@ -583,6 +582,9 @@ Resources:
           - Effect: Allow
             Resource: "*"
             Action:
+              - s3:ListBucket
+              - s3:ListMultiRegionAccessPoints
+              - s3:ListTagsForResource
               - sagemaker:DescribeApp
               - sagemaker:DescribeAppImageConfig
               - sagemaker:DescribeDomain
