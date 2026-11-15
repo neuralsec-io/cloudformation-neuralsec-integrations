@@ -100,9 +100,11 @@ Resources:
               - bedrock-mantle:GetProject
               - bedrock-mantle:ListProjects
               - bedrock-mantle:ListTagsForResource
+              - bedrock:GetCustomModel
               - bedrock:GetDataSource
               - bedrock:GetKnowledgeBase
               - bedrock:GetModelInvocationLoggingConfiguration
+              - bedrock:ListCustomModels
               - bedrock:ListDataSources
               - bedrock:ListGuardrails
               - bedrock:ListKnowledgeBases
@@ -154,7 +156,9 @@ Resources:
               - codeartifact:ListRepositories
               - codeartifact:ListTagsForResource
               - codebuild:BatchGetProjects
+              - codebuild:BatchGetReportGroups
               - codebuild:ListProjects
+              - codebuild:ListReportGroups
               - codecommit:GetRepository
               - codecommit:GetRepositoryTriggers
               - codecommit:ListRepositories
@@ -170,6 +174,10 @@ Resources:
               - cognito-identity:GetIdentityPoolRoles
               - cognito-identity:ListIdentityPools
               - cognito-identity:ListTagsForResource
+              - cognito-idp:DescribeRiskConfiguration
+              - cognito-idp:DescribeUserPool
+              - cognito-idp:GetUserPoolMfaConfig
+              - cognito-idp:ListUserPools
               - config:DescribeComplianceByConfigRule
               - config:DescribeConfigRules
               - config:DescribeConfigurationAggregators
@@ -204,13 +212,6 @@ Resources:
               - ds:ListTagsForResource
               - dynamodb:DescribeContinuousBackups
               - dynamodb:DescribeContributorInsights
-              - dynamodb:DescribeKinesisStreamingDestination
-              - dynamodb:DescribeTable
-              - dynamodb:DescribeTimeToLive
-              - dynamodb:GetResourcePolicy
-              - dynamodb:ListTables
-              - dynamodb:ListTagsOfResource
-              - ec2:DescribeAccountAttributes
 
   ReadPolicy02:
     Type: AWS::IAM::ManagedPolicy
@@ -225,6 +226,13 @@ Resources:
           - Effect: Allow
             Resource: "*"
             Action:
+              - dynamodb:DescribeKinesisStreamingDestination
+              - dynamodb:DescribeTable
+              - dynamodb:DescribeTimeToLive
+              - dynamodb:GetResourcePolicy
+              - dynamodb:ListTables
+              - dynamodb:ListTagsOfResource
+              - ec2:DescribeAccountAttributes
               - ec2:DescribeAddresses
               - ec2:DescribeAvailabilityZones
               - ec2:DescribeCarrierGateways
@@ -365,24 +373,14 @@ Resources:
               - glue:GetDatabases
               - glue:GetDevEndpoints
               - glue:GetJob
+              - glue:GetMLTransform
+              - glue:GetMLTransforms
               - glue:GetRegistry
               - glue:GetResourcePolicy
               - glue:GetSecurityConfiguration
               - glue:GetSecurityConfigurations
               - glue:GetTables
               - glue:GetTags
-              - glue:GetTrigger
-              - glue:ListJobs
-              - glue:ListRegistries
-              - glue:ListTriggers
-              - guardduty:GetDetector
-              - guardduty:ListDetectors
-              - iam:GenerateCredentialReport
-              - iam:GetAccessKeyLastUsed
-              - iam:GetAccountAuthorizationDetails
-              - iam:GetAccountPasswordPolicy
-              - iam:GetAccountSummary
-              - iam:GetCredentialReport
 
   ReadPolicy03:
     Type: AWS::IAM::ManagedPolicy
@@ -397,6 +395,19 @@ Resources:
           - Effect: Allow
             Resource: "*"
             Action:
+              - glue:GetTrigger
+              - glue:ListJobs
+              - glue:ListMLTransforms
+              - glue:ListRegistries
+              - glue:ListTriggers
+              - guardduty:GetDetector
+              - guardduty:ListDetectors
+              - iam:GenerateCredentialReport
+              - iam:GetAccessKeyLastUsed
+              - iam:GetAccountAuthorizationDetails
+              - iam:GetAccountPasswordPolicy
+              - iam:GetAccountSummary
+              - iam:GetCredentialReport
               - iam:GetLoginProfile
               - iam:GetOpenIDConnectProvider
               - iam:GetPolicy
@@ -413,6 +424,7 @@ Resources:
               - iam:ListRoles
               - iam:ListSAMLProviders
               - iam:ListServerCertificates
+              - iam:ListServiceSpecificCredentials
               - iam:ListVirtualMFADevices
               - inspector2:BatchGetAccountStatus
               - kafka:DescribeCluster
@@ -557,19 +569,6 @@ Resources:
               - sagemaker:DescribeEndpoint
               - sagemaker:DescribeEndpointConfig
               - sagemaker:DescribeImage
-              - sagemaker:DescribeImageVersion
-              - sagemaker:DescribeModel
-              - sagemaker:DescribeNotebookInstance
-              - sagemaker:DescribeTrainingJob
-              - sagemaker:DescribeUserProfile
-              - sagemaker:ListAppImageConfigs
-              - sagemaker:ListDomains
-              - sagemaker:ListEndpointConfigs
-              - sagemaker:ListEndpoints
-              - sagemaker:ListImageVersions
-              - sagemaker:ListImages
-              - sagemaker:ListModels
-              - sagemaker:ListNotebookInstances
 
   ReadPolicy04:
     Type: AWS::IAM::ManagedPolicy
@@ -584,6 +583,19 @@ Resources:
           - Effect: Allow
             Resource: "*"
             Action:
+              - sagemaker:DescribeImageVersion
+              - sagemaker:DescribeModel
+              - sagemaker:DescribeNotebookInstance
+              - sagemaker:DescribeTrainingJob
+              - sagemaker:DescribeUserProfile
+              - sagemaker:ListAppImageConfigs
+              - sagemaker:ListDomains
+              - sagemaker:ListEndpointConfigs
+              - sagemaker:ListEndpoints
+              - sagemaker:ListImageVersions
+              - sagemaker:ListImages
+              - sagemaker:ListModels
+              - sagemaker:ListNotebookInstances
               - sagemaker:ListTags
               - sagemaker:ListTrainingJobs
               - sagemaker:ListUserProfiles
