@@ -59,6 +59,7 @@ Resources:
               - access-analyzer:GetAnalyzer
               - access-analyzer:ListAnalyzers
               - access-analyzer:ListArchiveRules
+              - acm-pca:ListCertificateAuthorities
               - acm:DescribeCertificate
               - acm:ListCertificates
               - acm:ListTagsForCertificate
@@ -210,8 +211,6 @@ Resources:
               - ds:DescribeEventTopics
               - ds:ListCertificates
               - ds:ListLogSubscriptions
-              - ds:ListTagsForResource
-              - dynamodb:DescribeContinuousBackups
 
   ReadPolicy02:
     Type: AWS::IAM::ManagedPolicy
@@ -226,6 +225,8 @@ Resources:
           - Effect: Allow
             Resource: "*"
             Action:
+              - ds:ListTagsForResource
+              - dynamodb:DescribeContinuousBackups
               - dynamodb:DescribeContributorInsights
               - dynamodb:DescribeKinesisStreamingDestination
               - dynamodb:DescribeTable
@@ -379,7 +380,6 @@ Resources:
               - glue:GetMLTransform
               - glue:GetMLTransforms
               - glue:GetRegistry
-              - glue:GetResourcePolicy
 
   ReadPolicy03:
     Type: AWS::IAM::ManagedPolicy
@@ -394,6 +394,7 @@ Resources:
           - Effect: Allow
             Resource: "*"
             Action:
+              - glue:GetResourcePolicy
               - glue:GetSecurityConfiguration
               - glue:GetSecurityConfigurations
               - glue:GetTables
@@ -502,6 +503,7 @@ Resources:
               - rds:DescribeDBClusterSnapshotAttributes
               - rds:DescribeDBClusterSnapshots
               - rds:DescribeDBClusters
+              - rds:DescribeDBEngineVersions
               - rds:DescribeDBInstances
               - rds:DescribeDBParameterGroups
               - rds:DescribeDBParameters
@@ -567,8 +569,6 @@ Resources:
               - s3:ListBucket
               - s3:ListMultiRegionAccessPoints
               - s3:ListTagsForResource
-              - sagemaker:DescribeApp
-              - sagemaker:DescribeAppImageConfig
 
   ReadPolicy04:
     Type: AWS::IAM::ManagedPolicy
@@ -583,6 +583,8 @@ Resources:
           - Effect: Allow
             Resource: "*"
             Action:
+              - sagemaker:DescribeApp
+              - sagemaker:DescribeAppImageConfig
               - sagemaker:DescribeDomain
               - sagemaker:DescribeEndpoint
               - sagemaker:DescribeEndpointConfig
@@ -645,6 +647,7 @@ Resources:
               - ssm:DescribeParameters
               - ssm:ListAssociations
               - ssm:ListDocuments
+              - ssm:ListResourceComplianceSummaries
               - states:DescribeStateMachine
               - states:ListStateMachines
               - states:ListTagsForResource
