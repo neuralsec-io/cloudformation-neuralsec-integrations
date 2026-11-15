@@ -198,6 +198,9 @@ Resources:
               - dms:DescribeReplicationTasks
               - dms:ListTagsForResource
               - ds:DescribeDirectories
+              - ds:DescribeEventTopics
+              - ds:ListCertificates
+              - ds:ListLogSubscriptions
               - ds:ListTagsForResource
               - dynamodb:DescribeContinuousBackups
               - dynamodb:DescribeContributorInsights
@@ -208,9 +211,6 @@ Resources:
               - dynamodb:ListTables
               - dynamodb:ListTagsOfResource
               - ec2:DescribeAccountAttributes
-              - ec2:DescribeAddresses
-              - ec2:DescribeAvailabilityZones
-              - ec2:DescribeCarrierGateways
 
   ReadPolicy02:
     Type: AWS::IAM::ManagedPolicy
@@ -225,6 +225,9 @@ Resources:
           - Effect: Allow
             Resource: "*"
             Action:
+              - ec2:DescribeAddresses
+              - ec2:DescribeAvailabilityZones
+              - ec2:DescribeCarrierGateways
               - ec2:DescribeClientVpnAuthorizationRules
               - ec2:DescribeClientVpnEndpoints
               - ec2:DescribeClientVpnRoutes
@@ -348,6 +351,10 @@ Resources:
               - firehose:DescribeDeliveryStream
               - firehose:ListDeliveryStreams
               - firehose:ListTagsForDeliveryStream
+              - globalaccelerator:DescribeAccelerator
+              - globalaccelerator:DescribeAcceleratorAttributes
+              - globalaccelerator:ListAccelerators
+              - globalaccelerator:ListTagsForResource
               - glue:GetCrawlers
               - glue:GetDataCatalogEncryptionSettings
               - glue:GetDatabases
@@ -377,15 +384,6 @@ Resources:
               - iam:GetPolicyVersion
               - iam:GetSAMLProvider
               - iam:GetServerCertificate
-              - iam:ListAccessKeys
-              - iam:ListEntitiesForPolicy
-              - iam:ListInstanceProfiles
-              - iam:ListMFADevices
-              - iam:ListOpenIDConnectProviders
-              - iam:ListOrganizationsFeatures
-              - iam:ListPolicies
-              - iam:ListRoles
-              - iam:ListSAMLProviders
 
   ReadPolicy03:
     Type: AWS::IAM::ManagedPolicy
@@ -400,6 +398,15 @@ Resources:
           - Effect: Allow
             Resource: "*"
             Action:
+              - iam:ListAccessKeys
+              - iam:ListEntitiesForPolicy
+              - iam:ListInstanceProfiles
+              - iam:ListMFADevices
+              - iam:ListOpenIDConnectProviders
+              - iam:ListOrganizationsFeatures
+              - iam:ListPolicies
+              - iam:ListRoles
+              - iam:ListSAMLProviders
               - iam:ListServerCertificates
               - iam:ListVirtualMFADevices
               - inspector2:BatchGetAccountStatus
@@ -563,13 +570,6 @@ Resources:
               - secretsmanager:ListSecrets
               - securityhub:DescribeHub
               - servicecatalog:DescribePortfolio
-              - servicecatalog:ListPortfolios
-              - servicecatalog:ListTagsForResource
-              - servicediscovery:GetNamespace
-              - servicediscovery:GetService
-              - servicediscovery:GetServiceAttributes
-              - servicediscovery:ListNamespaces
-              - servicediscovery:ListServices
 
   ReadPolicy04:
     Type: AWS::IAM::ManagedPolicy
@@ -584,6 +584,13 @@ Resources:
           - Effect: Allow
             Resource: "*"
             Action:
+              - servicecatalog:ListPortfolios
+              - servicecatalog:ListTagsForResource
+              - servicediscovery:GetNamespace
+              - servicediscovery:GetService
+              - servicediscovery:GetServiceAttributes
+              - servicediscovery:ListNamespaces
+              - servicediscovery:ListServices
               - servicediscovery:ListTagsForResource
               - shield:DescribeProtection
               - shield:GetSubscriptionState
@@ -618,6 +625,21 @@ Resources:
               - timestream-influxdb:ListTagsForResource
               - transfer:DescribeServer
               - transfer:ListServers
+              - waf-regional:GetLoggingConfiguration
+              - waf-regional:GetRule
+              - waf-regional:GetWebACL
+              - waf-regional:ListActivatedRulesInRuleGroup
+              - waf-regional:ListResourcesForWebACL
+              - waf-regional:ListRuleGroups
+              - waf-regional:ListRules
+              - waf-regional:ListWebACLs
+              - waf:GetLoggingConfiguration
+              - waf:GetRule
+              - waf:GetWebACL
+              - waf:ListActivatedRulesInRuleGroup
+              - waf:ListRuleGroups
+              - waf:ListRules
+              - waf:ListWebACLs
               - wafv2:GetIPSet
               - wafv2:GetLoggingConfiguration
               - wafv2:GetRuleGroup
