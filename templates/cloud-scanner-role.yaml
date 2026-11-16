@@ -366,6 +366,7 @@ Resources:
               - firehose:DescribeDeliveryStream
               - firehose:ListDeliveryStreams
               - firehose:ListTagsForDeliveryStream
+              - fsx:DescribeFileSystems
               - glacier:GetVaultAccessPolicy
               - glacier:GetVaultLock
               - glacier:ListTagsForVault
@@ -377,7 +378,6 @@ Resources:
               - glue:GetCrawlers
               - glue:GetDataCatalogEncryptionSettings
               - glue:GetDatabases
-              - glue:GetDevEndpoints
 
   ReadPolicy03:
     Type: AWS::IAM::ManagedPolicy
@@ -392,6 +392,7 @@ Resources:
           - Effect: Allow
             Resource: "*"
             Action:
+              - glue:GetDevEndpoints
               - glue:GetJob
               - glue:GetMLTransform
               - glue:GetMLTransforms
@@ -567,7 +568,6 @@ Resources:
               - s3:GetMultiRegionAccessPoint
               - s3:GetReplicationConfiguration
               - s3:ListAccessPoints
-              - s3:ListAllMyBuckets
 
   ReadPolicy04:
     Type: AWS::IAM::ManagedPolicy
@@ -582,6 +582,7 @@ Resources:
           - Effect: Allow
             Resource: "*"
             Action:
+              - s3:ListAllMyBuckets
               - s3:ListBucket
               - s3:ListMultiRegionAccessPoints
               - s3:ListTagsForResource
