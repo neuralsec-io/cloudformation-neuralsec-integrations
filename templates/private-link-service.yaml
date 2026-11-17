@@ -152,7 +152,7 @@ Resources:
         - Key: neuralsec:component
           Value: private-link-service
         - Key: neuralsec:integration-version
-          Value: 0.3.18
+          Value: 0.3.19
         - Key: neuralsec:org_id
           Value: !Ref NeuralsecOrgId
         - Key: neuralsec:org_slug
@@ -188,7 +188,7 @@ Resources:
         - Key: neuralsec:component
           Value: private-link-service
         - Key: neuralsec:integration-version
-          Value: 0.3.18
+          Value: 0.3.19
         - Key: neuralsec:org_id
           Value: !Ref NeuralsecOrgId
         - Key: neuralsec:org_slug
@@ -222,7 +222,7 @@ Resources:
         - Key: neuralsec:component
           Value: private-link-service
         - Key: neuralsec:integration-version
-          Value: 0.3.18
+          Value: 0.3.19
         - Key: neuralsec:org_id
           Value: !Ref NeuralsecOrgId
         - Key: neuralsec:org_slug
@@ -250,7 +250,7 @@ Resources:
         - Key: neuralsec:component
           Value: private-link-service
         - Key: neuralsec:integration-version
-          Value: 0.3.18
+          Value: 0.3.19
         - Key: neuralsec:org_id
           Value: !Ref NeuralsecOrgId
         - Key: neuralsec:org_slug
@@ -278,7 +278,7 @@ Resources:
         - Key: neuralsec:component
           Value: private-link-service
         - Key: neuralsec:integration-version
-          Value: 0.3.18
+          Value: 0.3.19
         - Key: neuralsec:org_id
           Value: !Ref NeuralsecOrgId
         - Key: neuralsec:org_slug
@@ -346,7 +346,7 @@ Resources:
         - Key: neuralsec:component
           Value: private-link-service
         - Key: neuralsec:integration-version
-          Value: 0.3.18
+          Value: 0.3.19
         - Key: neuralsec:org_id
           Value: !Ref NeuralsecOrgId
         - Key: neuralsec:org_slug
@@ -381,7 +381,7 @@ Resources:
         - Key: neuralsec:component
           Value: private-link-service
         - Key: neuralsec:integration-version
-          Value: 0.3.18
+          Value: 0.3.19
         - Key: neuralsec:org_id
           Value: !Ref NeuralsecOrgId
         - Key: neuralsec:org_slug

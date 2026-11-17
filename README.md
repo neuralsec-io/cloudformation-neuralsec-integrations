@@ -6,8 +6,8 @@ CloudFormation templates for installing Neuralsec into an AWS account or an AWS 
 
 | Template | What it creates |
 | :--- | :--- |
-| `templates/cloud-scanner-role.yaml` | the read-only role `neuralsec-cloud-scanner` for one account, plus the managed policy that grants the named read actions |
-| `templates/cloud-scanner-org-reader.yaml` | the role `neuralsec-cloud-scanner-org-reader` for the management or delegated administrator account, with the `organizations` read actions only |
+| `templates/cloud-scanner-role.yaml` | the read-only role `neuralsec-cloud-scanner` for one account, plus the six read policies `neuralsec-cloud-scanner-read-01` to `-06` that grant the named read actions and the deny policy `neuralsec-cloud-scanner-deny` |
+| `templates/cloud-scanner-org-reader.yaml` | the role `neuralsec-cloud-scanner-org-reader` for the management or delegated administrator account, with the `organizations` read actions only in the policy `neuralsec-cloud-scanner-org-reader-read-01` |
 | `templates/cloud-scanner-stackset.yaml` | a service-managed StackSet that deploys `cloud-scanner-role.yaml` to every account of the target organizational units, with auto-deployment on |
 | `templates/codeartifact-read-role.yaml` | a role the broker assumes to read the CodeArtifact domains of your Neuralsec `aws_codeartifact` registries |
 | `templates/private-link-service.yaml` | an internal Network Load Balancer, target group, listener and endpoint service that publish a private HTTPS service to Neuralsec over AWS PrivateLink |
@@ -23,7 +23,25 @@ Parameters:
 
 Outputs: `RoleArn` (ARN of the scanner role) and `RoleName` (the fixed name `neuralsec-cloud-scanner`).
 
-The policy action list is generated from `terraform/modules/policy/actions.json` and is the same list the Terraform module uses. It has no write action and no content read.
+The policy action list is generated from `terraform/modules/policy/actions.json` and is the same list the Terraform module uses, cut into the same policies: the read policies `neuralsec-cloud-scanner-read-01` to `-06` (actions grouped by service, so a new action changes one policy) and the deny policy `neuralsec-cloud-scanner-deny`, which denies `apigateway:GET` on the API key, usage plan key, export and SDK paths. It has no write action and no action that returns a secret or an object body.
+
+Some reads on the list return resource configuration that can contain values, so "no action reads content" would overstate it. Neuralsec scrubs the responses of these actions in memory before anything is stored, and keeps identifiers, hashes, tags and metadata only:
+
+- `lambda:GetFunction`: only the image URI of a container function is used; the code location is never requested
+- `ecs:DescribeTaskDefinition`
+- `codebuild:BatchGetProjects`
+- `cloudformation:GetTemplate`
+- `cloudtrail:LookupEvents`
+- `autoscaling:DescribeLaunchConfigurations`
+- `ec2:DescribeLaunchTemplateVersions`
+- `ec2:DescribeInstanceAttribute`
+- `glue:GetJob`
+- `batch:DescribeJobDefinitions`
+- `sagemaker:DescribeModel`
+- `elasticbeanstalk:DescribeConfigurationSettings`
+- `datapipeline:GetPipelineDefinition`
+
+One install per account: the role name `neuralsec-cloud-scanner` and the policy names are fixed, so a second stack, or a stack next to the Terraform module, in the same account fails on the name. To change an install, update the existing stack. Use `cloud-scanner-stackset.yaml` for many accounts.
 
 IaC state locations are configured through the Terraform module `modules/cloud-scanner-role` only (`state_locations`). A CloudFormation template cannot build the per-location policy document that input produces, so this template grants no object read and the scanner reads no state file for a stack installed this way.
 
@@ -101,6 +119,19 @@ step.
 Every taggable resource carries `neuralsec:component`,
 `neuralsec:integration-version`, `neuralsec:org_id`, `neuralsec:org_slug`,
 `neuralsec:created_at` and `Name`.
+
+## CloudFormation and Terraform
+
+| Capability | CloudFormation | Terraform |
+| :--- | :--- | :--- |
+| Scanner role, read policies, deny policy, version tag | yes | yes |
+| Organization reader role | yes | yes |
+| Whole organization rollout | StackSet (`cloud-scanner-stackset.yaml`) | `org-rollout` root (OpenTofu 1.9 or newer, or Terraform with a generated provider file) |
+| IaC state locations (`state_locations`) | no | yes |
+| EKS access entries | no | yes (plus the ClusterRole manifest you apply) |
+| EKS public endpoint addresses as outputs | no (listed below) | yes |
+| CodeArtifact read role, private link service | yes | yes |
+| Sensor modules (Lambda, ECS, EKS, EC2) | no | yes |
 
 ## Deploying
 

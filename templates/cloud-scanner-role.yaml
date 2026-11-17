@@ -30,7 +30,7 @@ Resources:
       MaxSessionDuration: 3600
       Tags:
         - Key: neuralsec:integration-version
-          Value: "0.3.18" # cfngen:integration-version
+          Value: "0.3.19" # cfngen:integration-version
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -63,86 +63,15 @@ Resources:
               - access-analyzer:ListAnalyzers
               - access-analyzer:ListArchiveRules
               - acm-pca:ListCertificateAuthorities
-              - acm:DescribeCertificate
-              - acm:ListCertificates
-              - acm:ListTagsForCertificate
               - airflow:GetEnvironment
               - airflow:ListEnvironments
-              - apigateway:GET
-              - application-autoscaling:DescribeScalableTargets
-              - application-autoscaling:DescribeScalingPolicies
-              - application-autoscaling:DescribeScheduledActions
-              - application-autoscaling:ListTagsForResource
-              - appstream:DescribeFleets
-              - appstream:ListTagsForResource
-              - appsync:ListGraphqlApis
-              - athena:GetWorkGroup
-              - athena:ListTagsForResource
-              - athena:ListWorkGroups
-              - autoscaling:DescribeAutoScalingGroups
-              - autoscaling:DescribeLaunchConfigurations
-              - autoscaling:DescribePolicies
-              - autoscaling:DescribeScheduledActions
-              - backup:DescribeBackupVault
-              - backup:GetBackupPlan
-              - backup:GetBackupSelection
-              - backup:GetBackupVaultAccessPolicy
-              - backup:GetBackupVaultNotifications
-              - backup:ListBackupPlans
-              - backup:ListBackupSelections
-              - backup:ListBackupVaults
-              - backup:ListRecoveryPointsByBackupVault
-              - backup:ListTags
               - batch:DescribeJobDefinitions
-              - bedrock-agentcore:GetAgentRuntime
-              - bedrock-agentcore:GetAgentRuntimeEndpoint
-              - bedrock-agentcore:ListAgentRuntimeEndpoints
-              - bedrock-agentcore:ListAgentRuntimes
-              - bedrock-agentcore:ListTagsForResource
-              - bedrock-mantle:GetProject
-              - bedrock-mantle:ListProjects
-              - bedrock-mantle:ListTagsForResource
-              - bedrock:GetCustomModel
-              - bedrock:GetDataSource
-              - bedrock:GetKnowledgeBase
-              - bedrock:GetModelInvocationLoggingConfiguration
-              - bedrock:ListCustomModels
-              - bedrock:ListDataSources
-              - bedrock:ListGuardrails
-              - bedrock:ListKnowledgeBases
-              - bedrock:ListTagsForResource
-              - chatbot:DescribeSlackChannelConfigurations
-              - chatbot:ListAssociations
               - cloudformation:DescribeStacks
               - cloudformation:GetResource
               - cloudformation:GetTemplate
               - cloudformation:ListResources
               - cloudformation:ListStackResources
               - cloudformation:ListStacks
-              - cloudfront:GetCachePolicy
-              - cloudfront:GetCloudFrontOriginAccessIdentity
-              - cloudfront:GetDistribution
-              - cloudfront:GetDistributionConfig
-              - cloudfront:GetOriginAccessControl
-              - cloudfront:GetOriginRequestPolicy
-              - cloudfront:GetResponseHeadersPolicy
-              - cloudfront:ListCachePolicies
-              - cloudfront:ListCloudFrontOriginAccessIdentities
-              - cloudfront:ListDistributions
-              - cloudfront:ListFunctions
-              - cloudfront:ListOriginAccessControls
-              - cloudfront:ListOriginRequestPolicies
-              - cloudfront:ListResponseHeadersPolicies
-              - cloudfront:ListTagsForResource
-              - cloudtrail:DescribeTrails
-              - cloudtrail:GetEventConfiguration
-              - cloudtrail:GetEventSelectors
-              - cloudtrail:GetInsightSelectors
-              - cloudtrail:GetTrail
-              - cloudtrail:GetTrailStatus
-              - cloudtrail:ListTags
-              - cloudtrail:ListTrails
-              - cloudtrail:LookupEvents
               - cloudwatch:DescribeAlarms
               - cloudwatch:GetDashboard
               - cloudwatch:ListDashboards
@@ -157,63 +86,82 @@ Resources:
               - codeartifact:ListPackages
               - codeartifact:ListRepositories
               - codeartifact:ListTagsForResource
-              - codebuild:BatchGetProjects
-              - codebuild:BatchGetReportGroups
-              - codebuild:ListProjects
-              - codebuild:ListReportGroups
-              - codecommit:GetRepository
-              - codecommit:GetRepositoryTriggers
-              - codecommit:ListRepositories
-              - codecommit:ListTagsForResource
-              - codepipeline:GetPipeline
-              - codepipeline:GetPipelineState
-              - codepipeline:ListPipelines
-              - codepipeline:ListTagsForResource
-              - codepipeline:ListWebhooks
-              - codestar-notifications:DescribeNotificationRule
-              - codestar-notifications:ListNotificationRules
-              - cognito-identity:DescribeIdentityPool
-              - cognito-identity:GetIdentityPoolRoles
-              - cognito-identity:ListIdentityPools
-              - cognito-identity:ListTagsForResource
-              - cognito-idp:DescribeRiskConfiguration
-              - cognito-idp:DescribeUserPool
-              - cognito-idp:GetUserPoolMfaConfig
-              - cognito-idp:ListUserPools
-              - config:DescribeComplianceByConfigRule
-              - config:DescribeConfigRules
-              - config:DescribeConfigurationAggregators
-              - config:DescribeConfigurationRecorderStatus
-              - config:DescribeConfigurationRecorders
-              - config:DescribeDeliveryChannels
-              - config:ListConfigurationRecorders
-              - config:ListTagsForResource
-              - config:SelectAggregateResourceConfig
-              - config:SelectResourceConfig
-              - datapipeline:DescribePipelines
-              - datapipeline:GetPipelineDefinition
-              - datapipeline:ListPipelines
-              - datasync:DescribeTask
-              - datasync:ListTagsForResource
-              - datasync:ListTasks
-              - dax:DescribeClusters
-              - dax:DescribeParameterGroups
-              - dax:DescribeParameters
-              - dax:DescribeSubnetGroups
-              - dax:ListTags
-              - dlm:GetLifecyclePolicies
-              - dlm:GetLifecyclePolicy
-              - dms:DescribeEndpoints
-              - dms:DescribeReplicationInstances
-              - dms:DescribeReplicationTasks
-              - dms:ListTagsForResource
-              - ds:DescribeDirectories
-              - ds:DescribeEventTopics
-              - ds:ListCertificates
-              - ds:ListLogSubscriptions
-              - ds:ListTagsForResource
-              - dynamodb:DescribeContinuousBackups
-              - dynamodb:DescribeContributorInsights
+              - elasticache:DescribeCacheClusters
+              - elasticache:DescribeCacheParameterGroups
+              - elasticache:DescribeCacheParameters
+              - elasticache:DescribeCacheSubnetGroups
+              - elasticache:DescribeReplicationGroups
+              - elasticache:ListTagsForResource
+              - elasticmapreduce:DescribeCluster
+              - elasticmapreduce:GetBlockPublicAccessConfiguration
+              - elasticmapreduce:ListClusters
+              - glacier:GetVaultAccessPolicy
+              - glacier:GetVaultLock
+              - glacier:ListTagsForVault
+              - glacier:ListVaults
+              - iam:GenerateCredentialReport
+              - iam:GetAccessKeyLastUsed
+              - iam:GetAccountAuthorizationDetails
+              - iam:GetAccountPasswordPolicy
+              - iam:GetAccountSummary
+              - iam:GetCredentialReport
+              - iam:GetLoginProfile
+              - iam:GetOpenIDConnectProvider
+              - iam:GetPolicy
+              - iam:GetPolicyVersion
+              - iam:GetSAMLProvider
+              - iam:GetServerCertificate
+              - iam:ListAccessKeys
+              - iam:ListEntitiesForPolicy
+              - iam:ListInstanceProfiles
+              - iam:ListMFADevices
+              - iam:ListOpenIDConnectProviders
+              - iam:ListOrganizationsFeatures
+              - iam:ListPolicies
+              - iam:ListRoles
+              - iam:ListSAMLProviders
+              - iam:ListServerCertificates
+              - iam:ListServiceSpecificCredentials
+              - iam:ListVirtualMFADevices
+              - kinesis:DescribeStreamSummary
+              - kinesis:ListStreams
+              - kinesis:ListTagsForResource
+              - kinesis:ListTagsForStream
+              - logs:DescribeIndexPolicies
+              - logs:DescribeLogGroups
+              - logs:DescribeMetricFilters
+              - logs:DescribeResourcePolicies
+              - logs:GetDataProtectionPolicy
+              - logs:GetLogDelivery
+              - logs:ListTagsForResource
+              - rds:DescribeDBClusterParameterGroups
+              - rds:DescribeDBClusterParameters
+              - rds:DescribeDBClusterSnapshotAttributes
+              - rds:DescribeDBClusterSnapshots
+              - rds:DescribeDBClusters
+              - rds:DescribeDBEngineVersions
+              - rds:DescribeDBInstances
+              - rds:DescribeDBParameterGroups
+              - rds:DescribeDBParameters
+              - rds:DescribeDBSecurityGroups
+              - rds:DescribeDBSnapshotAttributes
+              - rds:DescribeDBSnapshots
+              - rds:DescribeDBSubnetGroups
+              - rds:DescribeEventSubscriptions
+              - rds:ListTagsForResource
+              - secretsmanager:DescribeSecret
+              - secretsmanager:GetResourcePolicy
+              - secretsmanager:ListSecrets
+              - sqs:GetQueueAttributes
+              - sqs:ListQueueTags
+              - sqs:ListQueues
+              - ssm:DescribeAssociation
+              - ssm:DescribeDocumentPermission
+              - ssm:DescribeInstanceInformation
+              - ssm:DescribeParameters
+              - ssm:ListAssociations
+              - ssm:ListDocuments
+              - ssm:ListResourceComplianceSummaries
 
   ReadPolicy02:
     Type: AWS::IAM::ManagedPolicy
@@ -228,12 +176,13 @@ Resources:
           - Effect: Allow
             Resource: "*"
             Action:
-              - dynamodb:DescribeKinesisStreamingDestination
-              - dynamodb:DescribeTable
-              - dynamodb:DescribeTimeToLive
-              - dynamodb:GetResourcePolicy
-              - dynamodb:ListTables
-              - dynamodb:ListTagsOfResource
+              - athena:GetWorkGroup
+              - athena:ListTagsForResource
+              - athena:ListWorkGroups
+              - dms:DescribeEndpoints
+              - dms:DescribeReplicationInstances
+              - dms:DescribeReplicationTasks
+              - dms:ListTagsForResource
               - ec2:DescribeAccountAttributes
               - ec2:DescribeAddresses
               - ec2:DescribeAvailabilityZones
@@ -288,91 +237,6 @@ Resources:
               - ec2:GetTransitGatewayRouteTableAssociations
               - ec2:GetTransitGatewayRouteTablePropagations
               - ec2:SearchTransitGatewayRoutes
-              - ecr:DescribeRepositories
-              - ecr:GetLifecyclePolicy
-              - ecr:GetRegistryScanningConfiguration
-              - ecr:GetRepositoryPolicy
-              - ecr:ListTagsForResource
-              - ecs:DescribeCapacityProviders
-              - ecs:DescribeClusters
-              - ecs:DescribeServices
-              - ecs:DescribeTaskDefinition
-              - ecs:DescribeTasks
-              - ecs:ListClusters
-              - ecs:ListServices
-              - ecs:ListTagsForResource
-              - ecs:ListTaskDefinitions
-              - ecs:ListTasks
-              - eks:DescribeAccessEntry
-              - eks:DescribeAddon
-              - eks:DescribeCluster
-              - eks:DescribeNodegroup
-              - eks:DescribePodIdentityAssociation
-              - eks:ListAccessEntries
-              - eks:ListAddons
-              - eks:ListAssociatedAccessPolicies
-              - eks:ListClusters
-              - eks:ListNodegroups
-              - eks:ListPodIdentityAssociations
-              - elasticache:DescribeCacheClusters
-              - elasticache:DescribeCacheParameterGroups
-              - elasticache:DescribeCacheParameters
-              - elasticache:DescribeCacheSubnetGroups
-              - elasticache:DescribeReplicationGroups
-              - elasticache:ListTagsForResource
-              - elasticbeanstalk:DescribeConfigurationSettings
-              - elasticbeanstalk:DescribeEnvironments
-              - elasticbeanstalk:ListTagsForResource
-              - elasticfilesystem:DescribeAccessPoints
-              - elasticfilesystem:DescribeBackupPolicy
-              - elasticfilesystem:DescribeFileSystemPolicy
-              - elasticfilesystem:DescribeFileSystems
-              - elasticfilesystem:DescribeLifecycleConfiguration
-              - elasticfilesystem:DescribeMountTargetSecurityGroups
-              - elasticfilesystem:DescribeMountTargets
-              - elasticfilesystem:DescribeReplicationConfigurations
-              - elasticloadbalancing:DescribeCapacityReservation
-              - elasticloadbalancing:DescribeListenerAttributes
-              - elasticloadbalancing:DescribeListeners
-              - elasticloadbalancing:DescribeLoadBalancerAttributes
-              - elasticloadbalancing:DescribeLoadBalancerPolicies
-              - elasticloadbalancing:DescribeLoadBalancers
-              - elasticloadbalancing:DescribeRules
-              - elasticloadbalancing:DescribeTags
-              - elasticloadbalancing:DescribeTargetGroupAttributes
-              - elasticloadbalancing:DescribeTargetGroups
-              - elasticloadbalancing:DescribeTargetHealth
-              - elasticmapreduce:DescribeCluster
-              - elasticmapreduce:GetBlockPublicAccessConfiguration
-              - elasticmapreduce:ListClusters
-              - emr-serverless:GetApplication
-              - emr-serverless:ListApplications
-              - es:DescribeDomains
-              - es:ListDomainNames
-              - es:ListTags
-              - events:DescribeApiDestination
-              - events:DescribeConnection
-              - events:DescribeEndpoint
-              - events:DescribeEventBus
-              - events:ListApiDestinations
-              - events:ListConnections
-              - events:ListEndpoints
-              - events:ListEventBuses
-              - events:ListRules
-              - events:ListTagsForResource
-              - events:ListTargetsByRule
-              - firehose:DescribeDeliveryStream
-              - firehose:ListDeliveryStreams
-              - firehose:ListTagsForDeliveryStream
-              - fsx:DescribeFileSystems
-              - glacier:GetVaultAccessPolicy
-              - glacier:GetVaultLock
-              - glacier:ListTagsForVault
-              - glacier:ListVaults
-              - globalaccelerator:DescribeAccelerator
-              - globalaccelerator:DescribeAcceleratorAttributes
-              - globalaccelerator:ListAccelerators
-              - globalaccelerator:ListTagsForResource
               - glue:GetCrawlers
               - glue:GetDataCatalogEncryptionSettings
               - glue:GetDatabases
@@ -383,6 +247,58 @@ Resources:
               - glue:GetRegistry
               - glue:GetResourcePolicy
               - glue:GetSecurityConfiguration
+              - glue:GetSecurityConfigurations
+              - glue:GetTables
+              - glue:GetTags
+              - glue:GetTrigger
+              - glue:ListJobs
+              - glue:ListMLTransforms
+              - glue:ListRegistries
+              - glue:ListTriggers
+              - lightsail:GetInstance
+              - lightsail:GetInstances
+              - lightsail:GetRelationalDatabase
+              - lightsail:GetRelationalDatabases
+              - lightsail:GetStaticIp
+              - lightsail:GetStaticIps
+              - macie2:GetAutomatedDiscoveryConfiguration
+              - macie2:GetMacieSession
+              - oam:GetLink
+              - oam:GetSink
+              - oam:GetSinkPolicy
+              - oam:ListLinks
+              - oam:ListSinks
+              - oam:ListTagsForResource
+              - resource-explorer-2:GetView
+              - resource-explorer-2:ListIndexes
+              - resource-explorer-2:ListViews
+              - resource-explorer-2:Search
+              - schemas:DescribeRegistry
+              - schemas:GetResourcePolicy
+              - schemas:ListRegistries
+              - servicediscovery:GetNamespace
+              - servicediscovery:GetService
+              - servicediscovery:GetServiceAttributes
+              - servicediscovery:ListNamespaces
+              - servicediscovery:ListServices
+              - servicediscovery:ListTagsForResource
+              - sns:GetDataProtectionPolicy
+              - sns:GetSubscriptionAttributes
+              - sns:GetTopicAttributes
+              - sns:ListSubscriptions
+              - sns:ListSubscriptionsByTopic
+              - sns:ListTagsForResource
+              - sns:ListTopics
+              - transfer:DescribeServer
+              - transfer:ListServers
+              - waf-regional:GetLoggingConfiguration
+              - waf-regional:GetRule
+              - waf-regional:GetWebACL
+              - waf-regional:ListActivatedRulesInRuleGroup
+              - waf-regional:ListResourcesForWebACL
+              - waf-regional:ListRuleGroups
+              - waf-regional:ListRules
+              - waf-regional:ListWebACLs
 
   ReadPolicy03:
     Type: AWS::IAM::ManagedPolicy
@@ -397,60 +313,240 @@ Resources:
           - Effect: Allow
             Resource: "*"
             Action:
-              - glue:GetSecurityConfigurations
-              - glue:GetTables
-              - glue:GetTags
-              - glue:GetTrigger
-              - glue:ListJobs
-              - glue:ListMLTransforms
-              - glue:ListRegistries
-              - glue:ListTriggers
-              - guardduty:GetDetector
-              - guardduty:ListDetectors
-              - iam:GenerateCredentialReport
-              - iam:GetAccessKeyLastUsed
-              - iam:GetAccountAuthorizationDetails
-              - iam:GetAccountPasswordPolicy
-              - iam:GetAccountSummary
-              - iam:GetCredentialReport
-              - iam:GetLoginProfile
-              - iam:GetOpenIDConnectProvider
-              - iam:GetPolicy
-              - iam:GetPolicyVersion
-              - iam:GetSAMLProvider
-              - iam:GetServerCertificate
-              - iam:ListAccessKeys
-              - iam:ListEntitiesForPolicy
-              - iam:ListInstanceProfiles
-              - iam:ListMFADevices
-              - iam:ListOpenIDConnectProviders
-              - iam:ListOrganizationsFeatures
-              - iam:ListPolicies
-              - iam:ListRoles
-              - iam:ListSAMLProviders
-              - iam:ListServerCertificates
-              - iam:ListServiceSpecificCredentials
-              - iam:ListVirtualMFADevices
+              - chatbot:DescribeSlackChannelConfigurations
+              - chatbot:ListAssociations
+              - codebuild:BatchGetProjects
+              - codebuild:BatchGetReportGroups
+              - codebuild:ListProjects
+              - codebuild:ListReportGroups
+              - codestar-notifications:DescribeNotificationRule
+              - codestar-notifications:ListNotificationRules
+              - cognito-idp:DescribeRiskConfiguration
+              - cognito-idp:DescribeUserPool
+              - cognito-idp:GetUserPoolMfaConfig
+              - cognito-idp:ListUserPools
+              - config:DescribeComplianceByConfigRule
+              - config:DescribeConfigRules
+              - config:DescribeConfigurationAggregators
+              - config:DescribeConfigurationRecorderStatus
+              - config:DescribeConfigurationRecorders
+              - config:DescribeDeliveryChannels
+              - config:ListConfigurationRecorders
+              - config:ListTagsForResource
+              - config:SelectAggregateResourceConfig
+              - config:SelectResourceConfig
+              - ds:DescribeDirectories
+              - ds:DescribeEventTopics
+              - ds:ListCertificates
+              - ds:ListLogSubscriptions
+              - ds:ListTagsForResource
+              - dynamodb:DescribeContinuousBackups
+              - dynamodb:DescribeContributorInsights
+              - dynamodb:DescribeKinesisStreamingDestination
+              - dynamodb:DescribeTable
+              - dynamodb:DescribeTimeToLive
+              - dynamodb:GetResourcePolicy
+              - dynamodb:ListTables
+              - dynamodb:ListTagsOfResource
+              - eks:DescribeAccessEntry
+              - eks:DescribeAddon
+              - eks:DescribeCluster
+              - eks:DescribeNodegroup
+              - eks:DescribePodIdentityAssociation
+              - eks:ListAccessEntries
+              - eks:ListAddons
+              - eks:ListAssociatedAccessPolicies
+              - eks:ListClusters
+              - eks:ListNodegroups
+              - eks:ListPodIdentityAssociations
+              - elasticbeanstalk:DescribeConfigurationSettings
+              - elasticbeanstalk:DescribeEnvironments
+              - elasticbeanstalk:ListTagsForResource
+              - es:DescribeDomains
+              - es:ListDomainNames
+              - es:ListTags
+              - events:DescribeApiDestination
+              - events:DescribeConnection
+              - events:DescribeEndpoint
+              - events:DescribeEventBus
+              - events:ListApiDestinations
+              - events:ListConnections
+              - events:ListEndpoints
+              - events:ListEventBuses
+              - events:ListRules
+              - events:ListTagsForResource
+              - events:ListTargetsByRule
+              - redshift:DescribeClusterParameterGroups
+              - redshift:DescribeClusterParameters
+              - redshift:DescribeClusterSecurityGroups
+              - redshift:DescribeClusterSnapshots
+              - redshift:DescribeClusterSubnetGroups
+              - redshift:DescribeClusters
+              - redshift:DescribeLoggingStatus
+              - route53:GetHealthCheck
+              - route53:GetHostedZone
+              - route53:ListHealthChecks
+              - route53:ListHostedZones
+              - route53:ListQueryLoggingConfigs
+              - route53:ListResourceRecordSets
+              - route53:ListTagsForResource
+              - sts:GetCallerIdentity
+              - tag:GetResources
+              - wafv2:GetIPSet
+              - wafv2:GetLoggingConfiguration
+              - wafv2:GetRuleGroup
+              - wafv2:GetWebACL
+              - wafv2:ListIPSets
+              - wafv2:ListLoggingConfigurations
+              - wafv2:ListResourcesForWebACL
+              - wafv2:ListRuleGroups
+              - wafv2:ListTagsForResource
+              - wafv2:ListWebACLs
+
+  ReadPolicy04:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: neuralsec-cloud-scanner-read-04
+      Description: Neuralsec cloud scanner read actions, part 4.
+      Roles:
+        - !Ref ScannerRole
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Resource: "*"
+            Action:
+              - application-autoscaling:DescribeScalableTargets
+              - application-autoscaling:DescribeScalingPolicies
+              - application-autoscaling:DescribeScheduledActions
+              - application-autoscaling:ListTagsForResource
+              - appstream:DescribeFleets
+              - appstream:ListTagsForResource
+              - bedrock-agentcore:GetAgentRuntime
+              - bedrock-agentcore:GetAgentRuntimeEndpoint
+              - bedrock-agentcore:ListAgentRuntimeEndpoints
+              - bedrock-agentcore:ListAgentRuntimes
+              - bedrock-agentcore:ListTagsForResource
+              - cloudfront:GetCachePolicy
+              - cloudfront:GetCloudFrontOriginAccessIdentity
+              - cloudfront:GetDistribution
+              - cloudfront:GetDistributionConfig
+              - cloudfront:GetOriginAccessControl
+              - cloudfront:GetOriginRequestPolicy
+              - cloudfront:GetResponseHeadersPolicy
+              - cloudfront:ListCachePolicies
+              - cloudfront:ListCloudFrontOriginAccessIdentities
+              - cloudfront:ListDistributions
+              - cloudfront:ListFunctions
+              - cloudfront:ListOriginAccessControls
+              - cloudfront:ListOriginRequestPolicies
+              - cloudfront:ListResponseHeadersPolicies
+              - cloudfront:ListTagsForResource
+              - datapipeline:DescribePipelines
+              - datapipeline:GetPipelineDefinition
+              - datapipeline:ListPipelines
+              - ecs:DescribeCapacityProviders
+              - ecs:DescribeClusters
+              - ecs:DescribeServices
+              - ecs:DescribeTaskDefinition
+              - ecs:DescribeTasks
+              - ecs:ListClusters
+              - ecs:ListServices
+              - ecs:ListTagsForResource
+              - ecs:ListTaskDefinitions
+              - ecs:ListTasks
+              - elasticfilesystem:DescribeAccessPoints
+              - elasticfilesystem:DescribeBackupPolicy
+              - elasticfilesystem:DescribeFileSystemPolicy
+              - elasticfilesystem:DescribeFileSystems
+              - elasticfilesystem:DescribeLifecycleConfiguration
+              - elasticfilesystem:DescribeMountTargetSecurityGroups
+              - elasticfilesystem:DescribeMountTargets
+              - elasticfilesystem:DescribeReplicationConfigurations
+              - emr-serverless:GetApplication
+              - emr-serverless:ListApplications
               - inspector2:BatchGetAccountStatus
-              - kafka:DescribeCluster
-              - kafka:DescribeConfiguration
-              - kafka:ListClusters
-              - kafka:ListConfigurations
               - kafkaconnect:DescribeConnector
               - kafkaconnect:DescribeWorkerConfiguration
               - kafkaconnect:ListConnectors
               - kafkaconnect:ListTagsForResource
               - kafkaconnect:ListWorkerConfigurations
-              - kinesis:DescribeStreamSummary
-              - kinesis:ListStreams
-              - kinesis:ListTagsForResource
-              - kinesis:ListTagsForStream
               - kms:DescribeKey
               - kms:GetKeyPolicy
               - kms:GetKeyRotationStatus
               - kms:ListAliases
               - kms:ListKeys
               - kms:ListResourceTags
+              - memorydb:DescribeClusters
+              - memorydb:DescribeSubnetGroups
+              - memorydb:ListTags
+              - mq:DescribeBroker
+              - mq:DescribeSharedResources
+              - mq:ListBrokers
+              - waf:GetLoggingConfiguration
+              - waf:GetRule
+              - waf:GetWebACL
+              - waf:ListActivatedRulesInRuleGroup
+              - waf:ListRuleGroups
+              - waf:ListRules
+              - waf:ListWebACLs
+
+  ReadPolicy05:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: neuralsec-cloud-scanner-read-05
+      Description: Neuralsec cloud scanner read actions, part 5.
+      Roles:
+        - !Ref ScannerRole
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Resource: "*"
+            Action:
+              - apigateway:GET
+              - backup:DescribeBackupVault
+              - backup:GetBackupPlan
+              - backup:GetBackupSelection
+              - backup:GetBackupVaultAccessPolicy
+              - backup:GetBackupVaultNotifications
+              - backup:ListBackupPlans
+              - backup:ListBackupSelections
+              - backup:ListBackupVaults
+              - backup:ListRecoveryPointsByBackupVault
+              - backup:ListTags
+              - bedrock-mantle:GetProject
+              - bedrock-mantle:ListProjects
+              - bedrock-mantle:ListTagsForResource
+              - codecommit:GetRepository
+              - codecommit:GetRepositoryTriggers
+              - codecommit:ListRepositories
+              - codecommit:ListTagsForResource
+              - datasync:DescribeTask
+              - datasync:ListTagsForResource
+              - datasync:ListTasks
+              - ecr:DescribeRepositories
+              - ecr:GetLifecyclePolicy
+              - ecr:GetRegistryScanningConfiguration
+              - ecr:GetRepositoryPolicy
+              - ecr:ListTagsForResource
+              - elasticloadbalancing:DescribeCapacityReservation
+              - elasticloadbalancing:DescribeListenerAttributes
+              - elasticloadbalancing:DescribeListeners
+              - elasticloadbalancing:DescribeLoadBalancerAttributes
+              - elasticloadbalancing:DescribeLoadBalancerPolicies
+              - elasticloadbalancing:DescribeLoadBalancers
+              - elasticloadbalancing:DescribeRules
+              - elasticloadbalancing:DescribeTags
+              - elasticloadbalancing:DescribeTargetGroupAttributes
+              - elasticloadbalancing:DescribeTargetGroups
+              - elasticloadbalancing:DescribeTargetHealth
+              - guardduty:GetDetector
+              - guardduty:ListDetectors
+              - kafka:DescribeCluster
+              - kafka:DescribeConfiguration
+              - kafka:ListClusters
+              - kafka:ListConfigurations
               - lambda:GetFunction
               - lambda:GetFunctionConfiguration
               - lambda:GetLayerVersionPolicy
@@ -464,27 +560,6 @@ Resources:
               - lambda:ListLayers
               - lambda:ListTags
               - lambda:ListVersionsByFunction
-              - lightsail:GetInstance
-              - lightsail:GetInstances
-              - lightsail:GetRelationalDatabase
-              - lightsail:GetRelationalDatabases
-              - lightsail:GetStaticIp
-              - lightsail:GetStaticIps
-              - logs:DescribeIndexPolicies
-              - logs:DescribeLogGroups
-              - logs:DescribeMetricFilters
-              - logs:DescribeResourcePolicies
-              - logs:GetDataProtectionPolicy
-              - logs:GetLogDelivery
-              - logs:ListTagsForResource
-              - macie2:GetAutomatedDiscoveryConfiguration
-              - macie2:GetMacieSession
-              - memorydb:DescribeClusters
-              - memorydb:DescribeSubnetGroups
-              - memorydb:ListTags
-              - mq:DescribeBroker
-              - mq:DescribeSharedResources
-              - mq:ListBrokers
               - network-firewall:DescribeFirewall
               - network-firewall:DescribeFirewallPolicy
               - network-firewall:DescribeLoggingConfiguration
@@ -493,51 +568,115 @@ Resources:
               - network-firewall:ListFirewalls
               - network-firewall:ListRuleGroups
               - network-firewall:ListTagsForResource
-              - oam:GetLink
-              - oam:GetSink
-              - oam:GetSinkPolicy
-              - oam:ListLinks
-              - oam:ListSinks
-              - oam:ListTagsForResource
-              - organizations:DescribeOrganization
-              - rds:DescribeDBClusterParameterGroups
-              - rds:DescribeDBClusterParameters
-              - rds:DescribeDBClusterSnapshotAttributes
-              - rds:DescribeDBClusterSnapshots
-              - rds:DescribeDBClusters
-              - rds:DescribeDBEngineVersions
-              - rds:DescribeDBInstances
-              - rds:DescribeDBParameterGroups
-              - rds:DescribeDBParameters
-              - rds:DescribeDBSecurityGroups
-              - rds:DescribeDBSnapshotAttributes
-              - rds:DescribeDBSnapshots
-              - rds:DescribeDBSubnetGroups
-              - rds:DescribeEventSubscriptions
-              - rds:ListTagsForResource
-              - redshift:DescribeClusterParameterGroups
-              - redshift:DescribeClusterParameters
-              - redshift:DescribeClusterSecurityGroups
-              - redshift:DescribeClusterSnapshots
-              - redshift:DescribeClusterSubnetGroups
-              - redshift:DescribeClusters
-              - redshift:DescribeLoggingStatus
-              - resource-explorer-2:GetView
-              - resource-explorer-2:ListIndexes
-              - resource-explorer-2:ListViews
-              - resource-explorer-2:Search
               - rolesanywhere:GetProfile
               - rolesanywhere:GetTrustAnchor
               - rolesanywhere:ListProfiles
               - rolesanywhere:ListTagsForResource
               - rolesanywhere:ListTrustAnchors
-              - route53:GetHealthCheck
-              - route53:GetHostedZone
-              - route53:ListHealthChecks
-              - route53:ListHostedZones
-              - route53:ListQueryLoggingConfigs
-              - route53:ListResourceRecordSets
-              - route53:ListTagsForResource
+              - sagemaker:DescribeApp
+              - sagemaker:DescribeAppImageConfig
+              - sagemaker:DescribeDomain
+              - sagemaker:DescribeEndpoint
+              - sagemaker:DescribeEndpointConfig
+              - sagemaker:DescribeImage
+              - sagemaker:DescribeImageVersion
+              - sagemaker:DescribeModel
+              - sagemaker:DescribeNotebookInstance
+              - sagemaker:DescribeTrainingJob
+              - sagemaker:DescribeUserProfile
+              - sagemaker:ListAppImageConfigs
+              - sagemaker:ListDomains
+              - sagemaker:ListEndpointConfigs
+              - sagemaker:ListEndpoints
+              - sagemaker:ListImageVersions
+              - sagemaker:ListImages
+              - sagemaker:ListModels
+              - sagemaker:ListNotebookInstances
+              - sagemaker:ListTags
+              - sagemaker:ListTrainingJobs
+              - sagemaker:ListUserProfiles
+              - securityhub:DescribeHub
+              - ses:GetEmailIdentity
+              - ses:GetEmailIdentityPolicies
+              - ses:ListEmailIdentities
+              - shield:DescribeProtection
+              - shield:GetSubscriptionState
+              - shield:ListProtections
+              - shield:ListTagsForResource
+              - states:DescribeStateMachine
+              - states:ListStateMachines
+              - states:ListTagsForResource
+              - timestream-influxdb:GetDbInstance
+              - timestream-influxdb:ListDbInstances
+              - timestream-influxdb:ListTagsForResource
+              - workspaces:DescribeTags
+              - workspaces:DescribeWorkspaceDirectories
+              - workspaces:DescribeWorkspaces
+
+  ReadPolicy06:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: neuralsec-cloud-scanner-read-06
+      Description: Neuralsec cloud scanner read actions, part 6.
+      Roles:
+        - !Ref ScannerRole
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Resource: "*"
+            Action:
+              - acm:DescribeCertificate
+              - acm:ListCertificates
+              - acm:ListTagsForCertificate
+              - appsync:ListGraphqlApis
+              - autoscaling:DescribeAutoScalingGroups
+              - autoscaling:DescribeLaunchConfigurations
+              - autoscaling:DescribePolicies
+              - autoscaling:DescribeScheduledActions
+              - bedrock:GetCustomModel
+              - bedrock:GetDataSource
+              - bedrock:GetKnowledgeBase
+              - bedrock:GetModelInvocationLoggingConfiguration
+              - bedrock:ListCustomModels
+              - bedrock:ListDataSources
+              - bedrock:ListGuardrails
+              - bedrock:ListKnowledgeBases
+              - bedrock:ListTagsForResource
+              - cloudtrail:DescribeTrails
+              - cloudtrail:GetEventConfiguration
+              - cloudtrail:GetEventSelectors
+              - cloudtrail:GetInsightSelectors
+              - cloudtrail:GetTrail
+              - cloudtrail:GetTrailStatus
+              - cloudtrail:ListTags
+              - cloudtrail:ListTrails
+              - cloudtrail:LookupEvents
+              - codepipeline:GetPipeline
+              - codepipeline:GetPipelineState
+              - codepipeline:ListPipelines
+              - codepipeline:ListTagsForResource
+              - codepipeline:ListWebhooks
+              - cognito-identity:DescribeIdentityPool
+              - cognito-identity:GetIdentityPoolRoles
+              - cognito-identity:ListIdentityPools
+              - cognito-identity:ListTagsForResource
+              - dax:DescribeClusters
+              - dax:DescribeParameterGroups
+              - dax:DescribeParameters
+              - dax:DescribeSubnetGroups
+              - dax:ListTags
+              - dlm:GetLifecyclePolicies
+              - dlm:GetLifecyclePolicy
+              - firehose:DescribeDeliveryStream
+              - firehose:ListDeliveryStreams
+              - firehose:ListTagsForDeliveryStream
+              - fsx:DescribeFileSystems
+              - globalaccelerator:DescribeAccelerator
+              - globalaccelerator:DescribeAcceleratorAttributes
+              - globalaccelerator:ListAccelerators
+              - globalaccelerator:ListTagsForResource
+              - organizations:DescribeOrganization
               - route53domains:GetDomainDetail
               - route53domains:ListDomains
               - route53domains:ListTagsForDomain
@@ -571,128 +710,17 @@ Resources:
               - s3:ListBucket
               - s3:ListMultiRegionAccessPoints
               - s3:ListTagsForResource
-              - sagemaker:DescribeApp
-              - sagemaker:DescribeAppImageConfig
-
-  ReadPolicy04:
-    Type: AWS::IAM::ManagedPolicy
-    Properties:
-      ManagedPolicyName: neuralsec-cloud-scanner-read-04
-      Description: Neuralsec cloud scanner read actions, part 4.
-      Roles:
-        - !Ref ScannerRole
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Resource: "*"
-            Action:
-              - sagemaker:DescribeDomain
-              - sagemaker:DescribeEndpoint
-              - sagemaker:DescribeEndpointConfig
-              - sagemaker:DescribeImage
-              - sagemaker:DescribeImageVersion
-              - sagemaker:DescribeModel
-              - sagemaker:DescribeNotebookInstance
-              - sagemaker:DescribeTrainingJob
-              - sagemaker:DescribeUserProfile
-              - sagemaker:ListAppImageConfigs
-              - sagemaker:ListDomains
-              - sagemaker:ListEndpointConfigs
-              - sagemaker:ListEndpoints
-              - sagemaker:ListImageVersions
-              - sagemaker:ListImages
-              - sagemaker:ListModels
-              - sagemaker:ListNotebookInstances
-              - sagemaker:ListTags
-              - sagemaker:ListTrainingJobs
-              - sagemaker:ListUserProfiles
               - scheduler:GetSchedule
               - scheduler:ListSchedules
-              - schemas:DescribeRegistry
-              - schemas:GetResourcePolicy
-              - schemas:ListRegistries
-              - secretsmanager:DescribeSecret
-              - secretsmanager:GetResourcePolicy
-              - secretsmanager:ListSecrets
-              - securityhub:DescribeHub
               - servicecatalog:DescribePortfolio
               - servicecatalog:DescribePortfolioShares
               - servicecatalog:ListPortfolios
               - servicecatalog:ListTagsForResource
-              - servicediscovery:GetNamespace
-              - servicediscovery:GetService
-              - servicediscovery:GetServiceAttributes
-              - servicediscovery:ListNamespaces
-              - servicediscovery:ListServices
-              - servicediscovery:ListTagsForResource
-              - ses:GetEmailIdentity
-              - ses:GetEmailIdentityPolicies
-              - ses:ListEmailIdentities
-              - shield:DescribeProtection
-              - shield:GetSubscriptionState
-              - shield:ListProtections
-              - shield:ListTagsForResource
-              - sns:GetDataProtectionPolicy
-              - sns:GetSubscriptionAttributes
-              - sns:GetTopicAttributes
-              - sns:ListSubscriptions
-              - sns:ListSubscriptionsByTopic
-              - sns:ListTagsForResource
-              - sns:ListTopics
-              - sqs:GetQueueAttributes
-              - sqs:ListQueueTags
-              - sqs:ListQueues
-              - ssm:DescribeAssociation
-              - ssm:DescribeDocumentPermission
-              - ssm:DescribeInstanceInformation
-              - ssm:DescribeParameters
-              - ssm:ListAssociations
-              - ssm:ListDocuments
-              - ssm:ListResourceComplianceSummaries
-              - states:DescribeStateMachine
-              - states:ListStateMachines
-              - states:ListTagsForResource
               - storagegateway:DescribeGatewayInformation
               - storagegateway:DescribeNFSFileShares
               - storagegateway:DescribeSMBFileShares
               - storagegateway:ListFileShares
               - storagegateway:ListGateways
-              - sts:GetCallerIdentity
-              - tag:GetResources
-              - timestream-influxdb:GetDbInstance
-              - timestream-influxdb:ListDbInstances
-              - timestream-influxdb:ListTagsForResource
-              - transfer:DescribeServer
-              - transfer:ListServers
-              - waf-regional:GetLoggingConfiguration
-              - waf-regional:GetRule
-              - waf-regional:GetWebACL
-              - waf-regional:ListActivatedRulesInRuleGroup
-              - waf-regional:ListResourcesForWebACL
-              - waf-regional:ListRuleGroups
-              - waf-regional:ListRules
-              - waf-regional:ListWebACLs
-              - waf:GetLoggingConfiguration
-              - waf:GetRule
-              - waf:GetWebACL
-              - waf:ListActivatedRulesInRuleGroup
-              - waf:ListRuleGroups
-              - waf:ListRules
-              - waf:ListWebACLs
-              - wafv2:GetIPSet
-              - wafv2:GetLoggingConfiguration
-              - wafv2:GetRuleGroup
-              - wafv2:GetWebACL
-              - wafv2:ListIPSets
-              - wafv2:ListLoggingConfigurations
-              - wafv2:ListResourcesForWebACL
-              - wafv2:ListRuleGroups
-              - wafv2:ListTagsForResource
-              - wafv2:ListWebACLs
-              - workspaces:DescribeTags
-              - workspaces:DescribeWorkspaceDirectories
-              - workspaces:DescribeWorkspaces
 
   DenyPolicy:
     Type: AWS::IAM::ManagedPolicy
