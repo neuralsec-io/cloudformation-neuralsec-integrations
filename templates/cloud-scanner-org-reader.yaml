@@ -25,6 +25,9 @@ Resources:
       RoleName: neuralsec-cloud-scanner-org-reader
       Description: Neuralsec read-only AWS Organizations role for the management or delegated administrator account.
       MaxSessionDuration: 3600
+      Tags:
+        - Key: neuralsec:integration-version
+          Value: "0.3.18" # cfngen:integration-version
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:

@@ -40,9 +40,10 @@ Parameters:
 | `ExternalId` | ExternalId of the Neuralsec connection |
 | `NeuralsecBrokerArn` | ARN of the Neuralsec broker role |
 | `TargetOrganizationalUnitIds` | comma-separated organizational unit ids that receive the role, for example `ou-abcd-11111111` |
+| `CallAs` | `SELF` (default) when the stack runs in the organization management account, `DELEGATED_ADMIN` when it runs in a delegated administrator account for CloudFormation StackSets |
 | `TemplateURL` | required, S3 HTTPS URL of `cloud-scanner-role.yaml` for the release you install, for example `https://neuralsec-release-cloudformation-templates.s3.eu-west-1.amazonaws.com/v0.2.0/cloud-scanner-role.yaml` |
 
-It creates the StackSet `neuralsec-cloud-scanner-role` (service-managed, `CAPABILITY_NAMED_IAM`, deployed to the region of the stack). Accounts added to the target OUs later receive the role automatically; stacks are removed when an account leaves the OUs (`RetainStacksOnAccountRemoval: false`). It has no outputs.
+It creates the StackSet `neuralsec-cloud-scanner-role` (service-managed, `CAPABILITY_NAMED_IAM`, deployed to the region of the stack). Deployments run with managed execution and these operation preferences: at most 25% of the accounts at a time, a failure tolerance of 10% and parallel regions, so one broken account does not fail the whole rollout. Accounts added to the target OUs later receive the role automatically; stacks are removed when an account leaves the OUs (`RetainStacksOnAccountRemoval: false`). It has no outputs.
 
 ### codeartifact-read-role.yaml
 
@@ -69,6 +70,8 @@ An internal Application Load Balancer (`TargetAlbArn`) is the recommended
 target: it keeps a stable ARN while its addresses change. A stack registers one
 target; a service behind several addresses uses the Terraform module
 `modules/private-link-service`, which takes a list.
+
+Changing `VpcId`, `TargetPort` or `HttpTargetPort` needs a new stack: the load balancer, security group and target groups have fixed names, so CloudFormation cannot replace them in place, and a load balancer cannot be detached from an endpoint service that has connected endpoints. Create the new stack, re-point the Neuralsec connection to its `ServiceName`, then delete the old stack.
 
 Parameters:
 
@@ -125,7 +128,7 @@ The values above are placeholders. Use the ones Neuralsec shows for your connect
 
 1. In the management account (or a delegated administrator), enable trusted access for CloudFormation StackSets in AWS Organizations.
 2. Deploy `cloud-scanner-org-reader.yaml` as a normal stack in the management or delegated administrator account.
-3. Deploy `cloud-scanner-stackset.yaml` as a normal stack in the same account, with `TemplateURL` set to the published `cloud-scanner-role.yaml` of the same release (or to your own copy in S3) and `TargetOrganizationalUnitIds` set to the OUs to scan:
+3. Deploy `cloud-scanner-stackset.yaml` as a normal stack in the same account (pass `CallAs=DELEGATED_ADMIN` when that account is a delegated administrator and not the management account), with `TemplateURL` set to the published `cloud-scanner-role.yaml` of the same release (or to your own copy in S3) and `TargetOrganizationalUnitIds` set to the OUs to scan:
 
 ```
 aws cloudformation deploy \

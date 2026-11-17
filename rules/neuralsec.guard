@@ -5,30 +5,146 @@
 # trust policy names the Neuralsec broker and requires the connection
 # ExternalId, with no condition-free fallback.
 
+# Every statement of every policy a template can attach to a role: customer
+# managed policies, standalone and role policies, and the inline policies of a
+# role. A rule that only looked at AWS::IAM::ManagedPolicy would miss an action
+# added through any other door.
+let policy_statements = Resources.*[ Type in ['AWS::IAM::ManagedPolicy', 'AWS::IAM::Policy', 'AWS::IAM::RolePolicy'] ].Properties.PolicyDocument.Statement[*]
+# Every role is a scanner role and is held to these rules, whatever its name:
+# the only exemption is the CodeArtifact read role, found by its logical ID,
+# because it legitimately holds other actions. A rule keyed on the role name would
+# let a renamed or computed RoleName skip every check below.
+let non_exempt_resources = Resources[ keys != 'CodeArtifactReadRole' ]
+let scanner_roles = %non_exempt_resources[ Type == 'AWS::IAM::Role' ]
+let inline_statements = %non_exempt_resources[ Type == 'AWS::IAM::Role' ].Properties.Policies[*].PolicyDocument.Statement[*]
+
+# A literal RoleName, so no role can hide behind a !Sub or be left unnamed.
+rule scanner_role_name_is_a_literal {
+  when %scanner_roles !empty {
+    %scanner_roles.Properties.RoleName exists
+    %scanner_roles.Properties.RoleName is_string
+  }
+}
+
+# The read policies of the account role: the template that must carry the
+# apigateway:GET Deny.
+let account_read_policies = Resources.*[ Type == 'AWS::IAM::ManagedPolicy' Properties.ManagedPolicyName == 'neuralsec-cloud-scanner-read-01' ]
+
 rule no_wildcard_actions {
-  Resources.*[ Type == 'AWS::IAM::ManagedPolicy' ] {
-    Properties.PolicyDocument.Statement[*].Action[*] != /.*[*].*/
+  when %policy_statements !empty {
+    %policy_statements.Action[*] != /.*[*].*/
+  }
+  when %inline_statements !empty {
+    %inline_statements.Action[*] != /.*[*].*/
   }
 }
 
-# Every action of a managed policy is a read action plus the two named
-# exceptions, exactly as in the Terraform chunker and scripts/check-actions.sh:
-# iam:GenerateCredentialReport starts the credential report and apigateway:GET
-# is API Gateway's read action (its IAM actions are HTTP verbs).
+# Every action is a read action plus the two named exceptions, exactly as in
+# the Terraform chunker and scripts/check-actions.sh: iam:GenerateCredentialReport
+# starts the credential report and apigateway:GET is API Gateway's read action
+# (its IAM actions are HTTP verbs).
 rule only_named_read_actions {
-  Resources.*[ Type == 'AWS::IAM::ManagedPolicy' ] {
-    Properties.PolicyDocument.Statement[*].Action[*] == /^([a-z0-9-]+:(List|Describe|Get|BatchGet|Search|Select|Lookup)[A-Za-z0-9]*|iam:GenerateCredentialReport|apigateway:GET)$/
+  when %policy_statements !empty {
+    %policy_statements.Action[*] == /^([a-z0-9-]+:(List|Describe|Get|BatchGet|Search|Select|Lookup)[A-Za-z0-9]*|iam:GenerateCredentialReport|apigateway:GET)$/
+  }
+  when %inline_statements !empty {
+    %inline_statements.Action[*] == /^([a-z0-9-]+:(List|Describe|Get|BatchGet|Search|Select|Lookup)[A-Za-z0-9]*|iam:GenerateCredentialReport|apigateway:GET)$/
   }
 }
 
-# Read verbs that return customer content instead of metadata (object bodies,
-# secret values, parameters, logs, items, messages, image layers) are never
-# allowed, in any letter case.
-rule no_content_read_actions {
-  Resources.*[ Type == 'AWS::IAM::ManagedPolicy' ] {
-    Properties.PolicyDocument.Statement[*].Action[*] != /^(?i)(s3:(getobject|getobjectversion|selectobjectcontent)|secretsmanager:(getsecretvalue|batchgetsecretvalue)|ssm:(getparameter|getparameters|getparametersbypath)|kms:decrypt|logs:(getlogevents|filterlogevents)|dynamodb:(getitem|scan|query)|sqs:receivemessage|ecr:(batchgetimage|getdownloadurlforlayer))$/
+# NotAction and NotResource turn a short list into "everything but", which no
+# reviewer can read. A scanner policy names what it allows.
+rule no_not_action_or_not_resource {
+  when %policy_statements !empty {
+    %policy_statements.NotAction not exists
+    %policy_statements.NotResource not exists
+  }
+  when %inline_statements !empty {
+    %inline_statements.NotAction not exists
+    %inline_statements.NotResource not exists
   }
 }
+
+# A managed policy ARN attached to a scanner role is a policy this repository
+# cannot see. Every permission of the role comes from the policies in the template.
+rule scanner_role_has_no_managed_policy_arns {
+  when %scanner_roles !empty {
+    %scanner_roles.Properties.ManagedPolicyArns not exists
+  }
+}
+
+# The scanner roles take the connection ExternalId from the template parameter
+# and nothing else: no literal, no other parameter, no Fn::Sub.
+rule scanner_role_trust_external_id_is_the_parameter {
+  when %scanner_roles !empty {
+    %scanner_roles.Properties.AssumeRolePolicyDocument.Statement[*].Condition.StringEquals.'sts:ExternalId'.Ref == 'ExternalId'
+  }
+}
+
+# Actions are always a list, so the rules above and below see every action.
+rule policy_actions_are_lists {
+  when %policy_statements !empty {
+    %policy_statements.Action is_list
+  }
+  when %inline_statements !empty {
+    %inline_statements.Action is_list
+  }
+}
+
+# The content and credential denylist is generated from
+# terraform/modules/policy/forbidden-actions.json by tools/cfngen, the same file
+# the Terraform chunker and scripts/check-actions.sh read. Content reads are
+# rejected in any letter case.
+# cfngen:begin forbidden-actions
+# Generated by tools/cfngen from terraform/modules/policy/forbidden-actions.json. Do not edit.
+rule no_content_read_actions {
+  when %policy_statements !empty {
+    %policy_statements.Action[*] != /^(?i)(appsync:getgraphqlapienvironmentvariables|athena:getqueryresults|cloudfront:getfunction|codecommit:getblob|codecommit:getfile|codecommit:getfolder|cognito-identity:getcredentialsforidentity|cognito-identity:getopenidtoken|dynamodb:batchgetitem|dynamodb:getitem|dynamodb:query|dynamodb:scan|ec2:getconsoleoutput|ec2:getconsolescreenshot|ec2:getpassworddata|ecr:batchgetimage|ecr:getauthorizationtoken|ecr:getdownloadurlforlayer|glacier:getjoboutput|kinesis:getrecords|kms:decrypt|lambda:getlayerversion|lightsail:getinstanceaccessdetails|lightsail:getrelationaldatabasemasteruserpassword|logs:filterlogevents|logs:getlogevents|logs:getlogrecord|logs:getqueryresults|redshift-serverless:getcredentials|redshift:getclustercredentials|redshift:getclustercredentialswithiam|s3:getobject|s3:getobjectversion|s3:selectobjectcontent|secretsmanager:batchgetsecretvalue|secretsmanager:getsecretvalue|sqs:receivemessage|ssm:getparameter|ssm:getparameterhistory|ssm:getparameters|ssm:getparametersbypath|sts:getfederationtoken|sts:getsessiontoken)$/
+  }
+  when %inline_statements !empty {
+    %inline_statements.Action[*] != /^(?i)(appsync:getgraphqlapienvironmentvariables|athena:getqueryresults|cloudfront:getfunction|codecommit:getblob|codecommit:getfile|codecommit:getfolder|cognito-identity:getcredentialsforidentity|cognito-identity:getopenidtoken|dynamodb:batchgetitem|dynamodb:getitem|dynamodb:query|dynamodb:scan|ec2:getconsoleoutput|ec2:getconsolescreenshot|ec2:getpassworddata|ecr:batchgetimage|ecr:getauthorizationtoken|ecr:getdownloadurlforlayer|glacier:getjoboutput|kinesis:getrecords|kms:decrypt|lambda:getlayerversion|lightsail:getinstanceaccessdetails|lightsail:getrelationaldatabasemasteruserpassword|logs:filterlogevents|logs:getlogevents|logs:getlogrecord|logs:getqueryresults|redshift-serverless:getcredentials|redshift:getclustercredentials|redshift:getclustercredentialswithiam|s3:getobject|s3:getobjectversion|s3:selectobjectcontent|secretsmanager:batchgetsecretvalue|secretsmanager:getsecretvalue|sqs:receivemessage|ssm:getparameter|ssm:getparameterhistory|ssm:getparameters|ssm:getparametersbypath|sts:getfederationtoken|sts:getsessiontoken)$/
+  }
+}
+
+# Names that carry credentials or content, except the named metadata reads.
+rule no_credential_or_content_name_patterns {
+  when %policy_statements !empty {
+    %policy_statements.Action[ this != /^(?i)(iam:getaccountpasswordpolicy|iam:listservicespecificcredentials)$/ ] != /^(?i)[a-z0-9-]+:.*(Credentials|Password|SecretValue|AuthorizationToken|SessionToken|FederationToken|GetObject$|GetRecords$|QueryResults$)/
+  }
+  when %inline_statements !empty {
+    %inline_statements.Action[ this != /^(?i)(iam:getaccountpasswordpolicy|iam:listservicespecificcredentials)$/ ] != /^(?i)[a-z0-9-]+:.*(Credentials|Password|SecretValue|AuthorizationToken|SessionToken|FederationToken|GetObject$|GetRecords$|QueryResults$)/
+  }
+}
+
+# Every statement is Allow, except the one Deny a scanner policy may hold: apigateway:GET on
+# the API Gateway paths that return content, which is the deny list of forbidden-actions.json.
+rule only_allow_or_the_api_gateway_content_deny {
+  when %policy_statements !empty {
+    %policy_statements.Effect IN ['Allow', 'Deny']
+    when %policy_statements[ Effect == 'Deny' ] !empty {
+      %policy_statements[ Effect == 'Deny' ] {
+        Action[*] == 'apigateway:GET'
+        Resource[*]['Fn::Sub'] == /^(arn:\$\{AWS::Partition\}:apigateway:\*::\/apikeys|arn:\$\{AWS::Partition\}:apigateway:\*::\/apikeys\/\*|arn:\$\{AWS::Partition\}:apigateway:\*::\/apis\/\*\/exports\/\*|arn:\$\{AWS::Partition\}:apigateway:\*::\/restapis\/\*\/stages\/\*\/exports\/\*|arn:\$\{AWS::Partition\}:apigateway:\*::\/restapis\/\*\/stages\/\*\/sdks\/\*|arn:\$\{AWS::Partition\}:apigateway:\*::\/usageplans\/\*\/keys|arn:\$\{AWS::Partition\}:apigateway:\*::\/usageplans\/\*\/keys\/\*)$/
+      }
+    }
+  }
+  when %inline_statements !empty {
+    %inline_statements.Effect == 'Allow'
+  }
+}
+
+# The account role template carries the Deny on every content path.
+rule api_gateway_content_deny_present when %account_read_policies !empty {
+  %policy_statements[ Effect == 'Deny' ] !empty
+  some %policy_statements[ Effect == 'Deny' ].Resource[*]['Fn::Sub'] == 'arn:${AWS::Partition}:apigateway:*::/apikeys'
+  some %policy_statements[ Effect == 'Deny' ].Resource[*]['Fn::Sub'] == 'arn:${AWS::Partition}:apigateway:*::/apikeys/*'
+  some %policy_statements[ Effect == 'Deny' ].Resource[*]['Fn::Sub'] == 'arn:${AWS::Partition}:apigateway:*::/apis/*/exports/*'
+  some %policy_statements[ Effect == 'Deny' ].Resource[*]['Fn::Sub'] == 'arn:${AWS::Partition}:apigateway:*::/restapis/*/stages/*/exports/*'
+  some %policy_statements[ Effect == 'Deny' ].Resource[*]['Fn::Sub'] == 'arn:${AWS::Partition}:apigateway:*::/restapis/*/stages/*/sdks/*'
+  some %policy_statements[ Effect == 'Deny' ].Resource[*]['Fn::Sub'] == 'arn:${AWS::Partition}:apigateway:*::/usageplans/*/keys'
+  some %policy_statements[ Effect == 'Deny' ].Resource[*]['Fn::Sub'] == 'arn:${AWS::Partition}:apigateway:*::/usageplans/*/keys/*'
+}
+# cfngen:end forbidden-actions
 
 rule no_wildcard_role_trust_actions {
   Resources.*[ Type == 'AWS::IAM::Role' ] {

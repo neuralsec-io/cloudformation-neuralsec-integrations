@@ -28,6 +28,9 @@ Resources:
       RoleName: neuralsec-cloud-scanner
       Description: Neuralsec read-only cloud inventory role. Assumed through the Neuralsec broker with the connection ExternalId.
       MaxSessionDuration: 3600
+      Tags:
+        - Key: neuralsec:integration-version
+          Value: "0.3.18" # cfngen:integration-version
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -72,10 +75,7 @@ Resources:
               - application-autoscaling:ListTagsForResource
               - appstream:DescribeFleets
               - appstream:ListTagsForResource
-              - appsync:GetGraphqlApi
-              - appsync:GetGraphqlApiEnvironmentVariables
               - appsync:ListGraphqlApis
-              - appsync:ListTagsForResource
               - athena:GetWorkGroup
               - athena:ListTagsForResource
               - athena:ListWorkGroups
@@ -119,12 +119,10 @@ Resources:
               - cloudformation:ListResources
               - cloudformation:ListStackResources
               - cloudformation:ListStacks
-              - cloudfront:DescribeFunction
               - cloudfront:GetCachePolicy
               - cloudfront:GetCloudFrontOriginAccessIdentity
               - cloudfront:GetDistribution
               - cloudfront:GetDistributionConfig
-              - cloudfront:GetFunction
               - cloudfront:GetOriginAccessControl
               - cloudfront:GetOriginRequestPolicy
               - cloudfront:GetResponseHeadersPolicy
@@ -210,6 +208,12 @@ Resources:
               - dms:DescribeReplicationTasks
               - dms:ListTagsForResource
               - ds:DescribeDirectories
+              - ds:DescribeEventTopics
+              - ds:ListCertificates
+              - ds:ListLogSubscriptions
+              - ds:ListTagsForResource
+              - dynamodb:DescribeContinuousBackups
+              - dynamodb:DescribeContributorInsights
 
   ReadPolicy02:
     Type: AWS::IAM::ManagedPolicy
@@ -224,12 +228,6 @@ Resources:
           - Effect: Allow
             Resource: "*"
             Action:
-              - ds:DescribeEventTopics
-              - ds:ListCertificates
-              - ds:ListLogSubscriptions
-              - ds:ListTagsForResource
-              - dynamodb:DescribeContinuousBackups
-              - dynamodb:DescribeContributorInsights
               - dynamodb:DescribeKinesisStreamingDestination
               - dynamodb:DescribeTable
               - dynamodb:DescribeTimeToLive
@@ -378,6 +376,13 @@ Resources:
               - glue:GetCrawlers
               - glue:GetDataCatalogEncryptionSettings
               - glue:GetDatabases
+              - glue:GetDevEndpoints
+              - glue:GetJob
+              - glue:GetMLTransform
+              - glue:GetMLTransforms
+              - glue:GetRegistry
+              - glue:GetResourcePolicy
+              - glue:GetSecurityConfiguration
 
   ReadPolicy03:
     Type: AWS::IAM::ManagedPolicy
@@ -392,13 +397,6 @@ Resources:
           - Effect: Allow
             Resource: "*"
             Action:
-              - glue:GetDevEndpoints
-              - glue:GetJob
-              - glue:GetMLTransform
-              - glue:GetMLTransforms
-              - glue:GetRegistry
-              - glue:GetResourcePolicy
-              - glue:GetSecurityConfiguration
               - glue:GetSecurityConfigurations
               - glue:GetTables
               - glue:GetTags
@@ -464,6 +462,7 @@ Resources:
               - lambda:ListFunctions
               - lambda:ListLayerVersions
               - lambda:ListLayers
+              - lambda:ListTags
               - lambda:ListVersionsByFunction
               - lightsail:GetInstance
               - lightsail:GetInstances
@@ -568,6 +567,12 @@ Resources:
               - s3:GetMultiRegionAccessPoint
               - s3:GetReplicationConfiguration
               - s3:ListAccessPoints
+              - s3:ListAllMyBuckets
+              - s3:ListBucket
+              - s3:ListMultiRegionAccessPoints
+              - s3:ListTagsForResource
+              - sagemaker:DescribeApp
+              - sagemaker:DescribeAppImageConfig
 
   ReadPolicy04:
     Type: AWS::IAM::ManagedPolicy
@@ -582,12 +587,6 @@ Resources:
           - Effect: Allow
             Resource: "*"
             Action:
-              - s3:ListAllMyBuckets
-              - s3:ListBucket
-              - s3:ListMultiRegionAccessPoints
-              - s3:ListTagsForResource
-              - sagemaker:DescribeApp
-              - sagemaker:DescribeAppImageConfig
               - sagemaker:DescribeDomain
               - sagemaker:DescribeEndpoint
               - sagemaker:DescribeEndpointConfig
@@ -694,6 +693,29 @@ Resources:
               - workspaces:DescribeTags
               - workspaces:DescribeWorkspaceDirectories
               - workspaces:DescribeWorkspaces
+
+  DenyPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: neuralsec-cloud-scanner-deny
+      Description: Neuralsec cloud scanner explicit denies for API Gateway content paths.
+      Roles:
+        - !Ref ScannerRole
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: DenyApiGatewayContentPaths
+            Effect: Deny
+            Action:
+              - apigateway:GET
+            Resource:
+              - !Sub "arn:${AWS::Partition}:apigateway:*::/apikeys"
+              - !Sub "arn:${AWS::Partition}:apigateway:*::/apikeys/*"
+              - !Sub "arn:${AWS::Partition}:apigateway:*::/apis/*/exports/*"
+              - !Sub "arn:${AWS::Partition}:apigateway:*::/restapis/*/stages/*/exports/*"
+              - !Sub "arn:${AWS::Partition}:apigateway:*::/restapis/*/stages/*/sdks/*"
+              - !Sub "arn:${AWS::Partition}:apigateway:*::/usageplans/*/keys"
+              - !Sub "arn:${AWS::Partition}:apigateway:*::/usageplans/*/keys/*"
 
   # cfngen:end account
 

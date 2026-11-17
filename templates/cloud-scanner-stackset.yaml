@@ -26,6 +26,17 @@ Parameters:
     AllowedPattern: ^https://.+$
     ConstraintDescription: An HTTPS URL.
     Description: Required. HTTPS URL of cloud-scanner-role.yaml for this release, from the Neuralsec template bucket.
+  CallAs:
+    Type: String
+    Default: SELF
+    AllowedValues:
+      - SELF
+      - DELEGATED_ADMIN
+    ConstraintDescription: SELF or DELEGATED_ADMIN.
+    Description: >-
+      SELF when this stack runs in the organization management account.
+      DELEGATED_ADMIN when it runs in a delegated administrator account for
+      CloudFormation StackSets.
 
 Resources:
   ScannerRoleStackSet:
@@ -34,12 +45,20 @@ Resources:
       StackSetName: neuralsec-cloud-scanner-role
       Description: Neuralsec read-only cloud inventory role in every account of the target organizational units.
       PermissionModel: SERVICE_MANAGED
-      CallAs: SELF
+      CallAs: !Ref CallAs
       AutoDeployment:
         Enabled: true
         RetainStacksOnAccountRemoval: false
       Capabilities:
         - CAPABILITY_NAMED_IAM
+      # Roll the role out in waves and stop on widespread failure, so a bad
+      # template or one broken account cannot fail every account at once.
+      ManagedExecution:
+        Active: true
+      OperationPreferences:
+        FailureTolerancePercentage: 10
+        MaxConcurrentPercentage: 25
+        RegionConcurrencyType: PARALLEL
       TemplateURL: !Ref TemplateURL
       Parameters:
         - ParameterKey: ExternalId

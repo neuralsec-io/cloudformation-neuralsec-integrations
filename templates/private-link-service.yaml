@@ -50,6 +50,12 @@ Parameters:
   VpcId:
     Type: AWS::EC2::VPC::Id
     Description: VPC that holds the service and the subnets of the load balancer.
+  VpcCidr:
+    Type: String
+    Default: ""
+    AllowedPattern: ^(([0-9]{1,3}\.){3}[0-9]{1,3}/[0-9]{1,2})?$
+    ConstraintDescription: Empty or an IPv4 CIDR block such as 10.0.0.0/16.
+    Description: IPv4 CIDR block of the VPC, or of the subnets that hold the target. The load balancer may send traffic to the target port only inside it. Required with TargetAlbArn or TargetInstanceId, whose addresses move inside the VPC; ignored with TargetIp, which is allowed as a single address, and with ExistingNlbArn.
   SubnetIds:
     Type: List<AWS::EC2::Subnet::Id>
     Description: Private subnets the load balancer uses, at least one in each of two availability zones.
@@ -109,6 +115,11 @@ Rules:
             !And [!Not [!Equals [!Ref TargetIp, ""]], !Not [!Equals [!Ref TargetInstanceId, ""]]]
           ]]
         AssertDescription: Do not set more than one of TargetAlbArn, TargetIp and TargetInstanceId.
+  VpcCidrForMovingTargets:
+    RuleCondition: !And [!Equals [!Ref ExistingNlbArn, ""], !Equals [!Ref TargetIp, ""]]
+    Assertions:
+      - Assert: !Not [!Equals [!Ref VpcCidr, ""]]
+        AssertDescription: Set VpcCidr with TargetAlbArn or TargetInstanceId.
   NoTargetWithExistingNlb:
     RuleCondition: !Not [!Equals [!Ref ExistingNlbArn, ""]]
     Assertions:
@@ -141,7 +152,7 @@ Resources:
         - Key: neuralsec:component
           Value: private-link-service
         - Key: neuralsec:integration-version
-          Value: 0.3.2
+          Value: 0.3.18
         - Key: neuralsec:org_id
           Value: !Ref NeuralsecOrgId
         - Key: neuralsec:org_slug
@@ -154,25 +165,30 @@ Resources:
   NlbSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Condition: CreateNlb
+    Metadata:
+      # VpcCidr defaults to empty and is required by a rule whenever it is used.
+      cfn-lint:
+        config:
+          ignore_checks:
+            - W1030
     Properties:
       GroupName: !Sub "neuralsec-pl-${Name}"
       GroupDescription: Neuralsec private link load balancer
       VpcId: !Ref VpcId
-      # CloudFormation cannot turn a parameter list into one egress rule per
-      # address, so the rule is the target port on IPv4: the load balancer only
-      # ever forwards to the target registered on it, and the range also covers
-      # an Application Load Balancer target, whose addresses move inside the VPC.
+      # Like the Terraform module, the rule is scoped to the target on the target
+      # port: the single address of TargetIp, or the VPC CIDR for an ALB or an
+      # instance, whose addresses move inside the VPC.
       SecurityGroupEgress:
         - IpProtocol: tcp
           FromPort: !Ref TargetPort
           ToPort: !Ref TargetPort
-          CidrIp: 0.0.0.0/0
+          CidrIp: !If [IpTargetSet, !Sub "${TargetIp}/32", !Ref VpcCidr]
           Description: Neuralsec private link to the service on the target port
       Tags:
         - Key: neuralsec:component
           Value: private-link-service
         - Key: neuralsec:integration-version
-          Value: 0.3.2
+          Value: 0.3.18
         - Key: neuralsec:org_id
           Value: !Ref NeuralsecOrgId
         - Key: neuralsec:org_slug
@@ -206,7 +222,7 @@ Resources:
         - Key: neuralsec:component
           Value: private-link-service
         - Key: neuralsec:integration-version
-          Value: 0.3.2
+          Value: 0.3.18
         - Key: neuralsec:org_id
           Value: !Ref NeuralsecOrgId
         - Key: neuralsec:org_slug
@@ -234,7 +250,7 @@ Resources:
         - Key: neuralsec:component
           Value: private-link-service
         - Key: neuralsec:integration-version
-          Value: 0.3.2
+          Value: 0.3.18
         - Key: neuralsec:org_id
           Value: !Ref NeuralsecOrgId
         - Key: neuralsec:org_slug
@@ -262,7 +278,7 @@ Resources:
         - Key: neuralsec:component
           Value: private-link-service
         - Key: neuralsec:integration-version
-          Value: 0.3.2
+          Value: 0.3.18
         - Key: neuralsec:org_id
           Value: !Ref NeuralsecOrgId
         - Key: neuralsec:org_slug
@@ -292,12 +308,18 @@ Resources:
   HttpEgressRule:
     Type: AWS::EC2::SecurityGroupEgress
     Condition: HttpEgress
+    Metadata:
+      # VpcCidr defaults to empty and is required by a rule whenever it is used.
+      cfn-lint:
+        config:
+          ignore_checks:
+            - W1030
     Properties:
       GroupId: !Ref NlbSecurityGroup
       IpProtocol: tcp
       FromPort: !Ref HttpTargetPort
       ToPort: !Ref HttpTargetPort
-      CidrIp: 0.0.0.0/0
+      CidrIp: !If [IpTargetSet, !Sub "${TargetIp}/32", !Ref VpcCidr]
       Description: Neuralsec private link to the service on the HTTP target port
 
   HttpTargetGroup:
@@ -324,7 +346,7 @@ Resources:
         - Key: neuralsec:component
           Value: private-link-service
         - Key: neuralsec:integration-version
-          Value: 0.3.2
+          Value: 0.3.18
         - Key: neuralsec:org_id
           Value: !Ref NeuralsecOrgId
         - Key: neuralsec:org_slug
@@ -359,7 +381,7 @@ Resources:
         - Key: neuralsec:component
           Value: private-link-service
         - Key: neuralsec:integration-version
-          Value: 0.3.2
+          Value: 0.3.18
         - Key: neuralsec:org_id
           Value: !Ref NeuralsecOrgId
         - Key: neuralsec:org_slug
