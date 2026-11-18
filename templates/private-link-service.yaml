@@ -4,11 +4,11 @@ Description: >-
   Neuralsec private link service. Creates an internal Network Load Balancer in
   front of a private HTTPS service, such as a package registry, and publishes
   it as an AWS PrivateLink endpoint service whose only allowed principal is the
-  Neuralsec role. TLS stays end to end: the load balancer does not terminate
-  it, so the service presents its own certificate. Set TargetAlbArn to publish
+  Neuralsec role. TLS stays end to end. Listener ports are ListenerPort
+  and HttpListenerPort; enter them in the Neuralsec app. Set TargetAlbArn to publish
   an internal Application Load Balancer, the recommended target: it keeps a
   stable ARN while its addresses change. Set ExistingNlbArn to publish a load
-  balancer you already have. HttpTargetPort adds plain HTTP on port 80. A stack registers one target, TargetAlbArn,
+  balancer you already have. HttpTargetPort adds plain HTTP. A stack registers one target, TargetAlbArn,
   TargetIp or TargetInstanceId; a service behind several addresses needs the
   Terraform module, which takes a list. After the stack is created, allow the
   NlbSecurityGroupId output on the target port in the security group of the
@@ -64,7 +64,7 @@ Parameters:
     Default: ""
     AllowedPattern: ^(|arn:aws[a-z-]*:elasticloadbalancing:[a-z0-9-]+:[0-9]{12}:loadbalancer/app/.+)$
     ConstraintDescription: Empty or the ARN of an Application Load Balancer.
-    Description: ARN of an internal Application Load Balancer, the recommended target. Set exactly one of TargetAlbArn, TargetIp and TargetInstanceId, or ExistingNlbArn instead. An ALB target next to ExistingNlbArn is rejected. TargetPort must be the port of an ALB listener, 443 by default.
+    Description: ARN of an internal Application Load Balancer, the recommended target. Set exactly one of TargetAlbArn, TargetIp and TargetInstanceId, or ExistingNlbArn instead. An ALB target next to ExistingNlbArn is rejected. TargetPort, or ListenerPort when TargetPort is 0, must be the port of an ALB listener.
   TargetIp:
     Type: String
     Default: ""
@@ -77,18 +77,30 @@ Parameters:
     AllowedPattern: ^(i-[0-9a-f]{8,17})?$
     ConstraintDescription: Empty or an instance id.
     Description: Instance id of the service. Set exactly one of TargetAlbArn, TargetIp and TargetInstanceId, unless ExistingNlbArn is set, which ignores it.
-  TargetPort:
+  ListenerPort:
     Type: Number
     Default: 443
     MinValue: 1
     MaxValue: 65535
-    Description: TCP port of the target. The listener on 443 is HTTPS.
+    Description: TCP port the load balancer listens on for HTTPS, and the port the Neuralsec connection uses. Enter the same port in the Neuralsec app. Ignored with ExistingNlbArn, whose listeners must match the ports entered in the Neuralsec app.
+  HttpListenerPort:
+    Type: Number
+    Default: 80
+    MinValue: 1
+    MaxValue: 65535
+    Description: TCP port the load balancer listens on for plain HTTP, used only when HttpTargetPort is set. It must differ from ListenerPort.
+  TargetPort:
+    Type: Number
+    Default: 0
+    MinValue: 0
+    MaxValue: 65535
+    Description: TCP port of the target. 0, the default, uses ListenerPort.
   HttpTargetPort:
     Type: Number
     Default: 0
     MinValue: 0
     MaxValue: 65535
-    Description: Optional. TCP port of the target for plain HTTP; 0 disables it. When set, the load balancer also listens on TCP 80 and forwards to a second target group on this port, with the same target as the 443 path. Plain HTTP is supported only through this private connection, on port 80. Prefer HTTPS. Ignored with ExistingNlbArn; add the TCP 80 listener to your load balancer yourself.
+    Description: Optional. TCP port of the target for plain HTTP; 0 disables it. When set, the load balancer also listens on HttpListenerPort and forwards to a second target group on this port, with the same target as the 443 path. Plain HTTP is supported only through this private connection. Prefer HTTPS. Ignored with ExistingNlbArn; add the plain HTTP listener to your load balancer yourself.
   AcceptanceRequired:
     Type: String
     Default: "true"
@@ -120,6 +132,11 @@ Rules:
     Assertions:
       - Assert: !Not [!Equals [!Ref VpcCidr, ""]]
         AssertDescription: Set VpcCidr with TargetAlbArn or TargetInstanceId.
+  DistinctListenerPorts:
+    RuleCondition: !And [!Equals [!Ref ExistingNlbArn, ""], !Not [!Equals [!Ref HttpTargetPort, 0]]]
+    Assertions:
+      - Assert: !Not [!Equals [!Ref ListenerPort, !Ref HttpListenerPort]]
+        AssertDescription: ListenerPort and HttpListenerPort must differ when HttpTargetPort is set.
   NoTargetWithExistingNlb:
     RuleCondition: !Not [!Equals [!Ref ExistingNlbArn, ""]]
     Assertions:
@@ -131,8 +148,11 @@ Conditions:
   AlbTargetSet: !And [!Condition CreateNlb, !Not [!Equals [!Ref TargetAlbArn, ""]]]
   IpTargetSet: !And [!Condition CreateNlb, !Not [!Equals [!Ref TargetIp, ""]]]
   InstanceTargetSet: !And [!Condition CreateNlb, !Not [!Equals [!Ref TargetInstanceId, ""]]]
+  TargetPortSet: !Not [!Equals [!Ref TargetPort, 0]]
   HttpEnabled: !And [!Condition CreateNlb, !Not [!Equals [!Ref HttpTargetPort, 0]]]
-  HttpEgress: !And [!Condition HttpEnabled, !Not [!Equals [!Ref HttpTargetPort, !Ref TargetPort]]]
+  HttpSameAsTargetPort: !And [!Condition TargetPortSet, !Equals [!Ref HttpTargetPort, !Ref TargetPort]]
+  HttpSameAsListenerPort: !And [!Not [!Condition TargetPortSet], !Equals [!Ref HttpTargetPort, !Ref ListenerPort]]
+  HttpEgress: !And [!Condition HttpEnabled, !Not [!Condition HttpSameAsTargetPort], !Not [!Condition HttpSameAsListenerPort]]
   CrossRegion: !Not [!Equals [!Ref NeuralsecRegion, !Ref "AWS::Region"]]
   NeedsAcceptance: !Equals [!Ref AcceptanceRequired, "true"]
 
@@ -152,7 +172,7 @@ Resources:
         - Key: neuralsec:component
           Value: private-link-service
         - Key: neuralsec:integration-version
-          Value: 0.3.19
+          Value: 0.3.20
         - Key: neuralsec:org_id
           Value: !Ref NeuralsecOrgId
         - Key: neuralsec:org_slug
@@ -180,15 +200,15 @@ Resources:
       # instance, whose addresses move inside the VPC.
       SecurityGroupEgress:
         - IpProtocol: tcp
-          FromPort: !Ref TargetPort
-          ToPort: !Ref TargetPort
+          FromPort: !If [TargetPortSet, !Ref TargetPort, !Ref ListenerPort]
+          ToPort: !If [TargetPortSet, !Ref TargetPort, !Ref ListenerPort]
           CidrIp: !If [IpTargetSet, !Sub "${TargetIp}/32", !Ref VpcCidr]
           Description: Neuralsec private link to the service on the target port
       Tags:
         - Key: neuralsec:component
           Value: private-link-service
         - Key: neuralsec:integration-version
-          Value: 0.3.19
+          Value: 0.3.20
         - Key: neuralsec:org_id
           Value: !Ref NeuralsecOrgId
         - Key: neuralsec:org_slug
@@ -203,7 +223,7 @@ Resources:
     Condition: AlbTargetSet
     Properties:
       Name: !Sub "neuralsec-a-${Name}"
-      Port: !Ref TargetPort
+      Port: !If [TargetPortSet, !Ref TargetPort, !Ref ListenerPort]
       Protocol: TCP
       TargetType: alb
       VpcId: !Ref VpcId
@@ -211,18 +231,18 @@ Resources:
       # AWS requires an HTTP or HTTPS health check for it: HTTPS on the listener
       # port, so any answer below 500 proves the ALB is up.
       HealthCheckProtocol: HTTPS
-      HealthCheckPort: !Ref TargetPort
+      HealthCheckPort: !If [TargetPortSet, !Ref TargetPort, !Ref ListenerPort]
       HealthCheckPath: /
       Matcher:
         HttpCode: 200-499
       Targets:
         - Id: !Ref TargetAlbArn
-          Port: !Ref TargetPort
+          Port: !If [TargetPortSet, !Ref TargetPort, !Ref ListenerPort]
       Tags:
         - Key: neuralsec:component
           Value: private-link-service
         - Key: neuralsec:integration-version
-          Value: 0.3.19
+          Value: 0.3.20
         - Key: neuralsec:org_id
           Value: !Ref NeuralsecOrgId
         - Key: neuralsec:org_slug
@@ -237,20 +257,20 @@ Resources:
     Condition: IpTargetSet
     Properties:
       Name: !Sub "neuralsec-pl-${Name}"
-      Port: !Ref TargetPort
+      Port: !If [TargetPortSet, !Ref TargetPort, !Ref ListenerPort]
       Protocol: TCP
       TargetType: ip
       VpcId: !Ref VpcId
       HealthCheckProtocol: TCP
-      HealthCheckPort: !Ref TargetPort
+      HealthCheckPort: !If [TargetPortSet, !Ref TargetPort, !Ref ListenerPort]
       Targets:
         - Id: !Ref TargetIp
-          Port: !Ref TargetPort
+          Port: !If [TargetPortSet, !Ref TargetPort, !Ref ListenerPort]
       Tags:
         - Key: neuralsec:component
           Value: private-link-service
         - Key: neuralsec:integration-version
-          Value: 0.3.19
+          Value: 0.3.20
         - Key: neuralsec:org_id
           Value: !Ref NeuralsecOrgId
         - Key: neuralsec:org_slug
@@ -265,20 +285,20 @@ Resources:
     Condition: InstanceTargetSet
     Properties:
       Name: !Sub "neuralsec-i-${Name}"
-      Port: !Ref TargetPort
+      Port: !If [TargetPortSet, !Ref TargetPort, !Ref ListenerPort]
       Protocol: TCP
       TargetType: instance
       VpcId: !Ref VpcId
       HealthCheckProtocol: TCP
-      HealthCheckPort: !Ref TargetPort
+      HealthCheckPort: !If [TargetPortSet, !Ref TargetPort, !Ref ListenerPort]
       Targets:
         - Id: !Ref TargetInstanceId
-          Port: !Ref TargetPort
+          Port: !If [TargetPortSet, !Ref TargetPort, !Ref ListenerPort]
       Tags:
         - Key: neuralsec:component
           Value: private-link-service
         - Key: neuralsec:integration-version
-          Value: 0.3.19
+          Value: 0.3.20
         - Key: neuralsec:org_id
           Value: !Ref NeuralsecOrgId
         - Key: neuralsec:org_slug
@@ -293,7 +313,7 @@ Resources:
     Condition: CreateNlb
     Properties:
       LoadBalancerArn: !GetAtt LoadBalancer.LoadBalancerArn
-      Port: 443
+      Port: !Ref ListenerPort
       Protocol: TCP
       DefaultActions:
         - Type: forward
@@ -346,7 +366,7 @@ Resources:
         - Key: neuralsec:component
           Value: private-link-service
         - Key: neuralsec:integration-version
-          Value: 0.3.19
+          Value: 0.3.20
         - Key: neuralsec:org_id
           Value: !Ref NeuralsecOrgId
         - Key: neuralsec:org_slug
@@ -361,7 +381,7 @@ Resources:
     Condition: HttpEnabled
     Properties:
       LoadBalancerArn: !GetAtt LoadBalancer.LoadBalancerArn
-      Port: 80
+      Port: !Ref HttpListenerPort
       Protocol: TCP
       DefaultActions:
         - Type: forward
@@ -381,7 +401,7 @@ Resources:
         - Key: neuralsec:component
           Value: private-link-service
         - Key: neuralsec:integration-version
-          Value: 0.3.19
+          Value: 0.3.20
         - Key: neuralsec:org_id
           Value: !Ref NeuralsecOrgId
         - Key: neuralsec:org_slug

@@ -30,7 +30,7 @@ Resources:
       MaxSessionDuration: 3600
       Tags:
         - Key: neuralsec:integration-version
-          Value: "0.3.19" # cfngen:integration-version
+          Value: "0.3.20" # cfngen:integration-version
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
