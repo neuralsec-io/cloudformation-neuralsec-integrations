@@ -30,7 +30,7 @@ Resources:
       MaxSessionDuration: 3600
       Tags:
         - Key: neuralsec:integration-version
-          Value: "0.3.22" # cfngen:integration-version
+          Value: "0.3.23" # cfngen:integration-version
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -418,8 +418,6 @@ Resources:
             Action:
               - application-autoscaling:DescribeScalableTargets
               - application-autoscaling:DescribeScalingPolicies
-              - application-autoscaling:DescribeScheduledActions
-              - application-autoscaling:ListTagsForResource
               - appstream:DescribeFleets
               - appstream:ListTagsForResource
               - bedrock-agentcore:GetAgentRuntime
@@ -453,6 +451,7 @@ Resources:
               - ecs:ListClusters
               - ecs:ListServices
               - ecs:ListTagsForResource
+              - ecs:ListTaskDefinitionFamilies
               - ecs:ListTaskDefinitions
               - ecs:ListTasks
               - elasticfilesystem:DescribeAccessPoints
